@@ -1,0 +1,64 @@
+# 하루 10번 도는 갱신 작업. 파일은 이거 하나입니다.
+# cron 은 UTC 기준이라 한국시간에서 9시간을 뺀 값입니다.
+name: 갱신
+
+on:
+  schedule:
+    - cron: "30 15 * * *"   # KST 00:30  A  MLB 경기 생성 + 정산 + 심층 스탯
+    - cron: "30 16 * * *"   # KST 01:30  B  MLB 이른 경기 라인업
+    - cron: "30 18 * * *"   # KST 03:30  C  MLB 배당 스냅샷
+    - cron: "30 20 * * *"   # KST 05:30  C  MLB 배당 스냅샷
+    - cron: "30 22 * * *"   # KST 07:30  D  MLB 본경기 라인업
+    - cron: "30 0  * * *"   # KST 09:30  E  축구 + MLB 스냅샷
+    - cron: "30 3  * * *"   # KST 12:30  F  KBO·NPB 경기 생성 + 정산
+    - cron: "30 6  * * *"   # KST 15:30  G  MLB 결과 마감
+    - cron: "30 8  * * *"   # KST 17:30  H  KBO·NPB 라인업 확정
+    - cron: "30 14 * * *"   # KST 23:30  I  KBO·NPB 결과 마감
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "손으로 돌릴 때 고르는 작업 (비우면 지금 시각에 맞춰 자동)"
+        required: false
+        default: ""
+        type: choice
+        options: ["", "A", "B", "C", "D", "E", "F", "G", "H", "I"]
+
+# 앞 런이 안 끝났는데 다음 런이 겹쳐 돌면 data/ 가 꼬입니다. 줄 세웁니다.
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 갱신 실행
+        env:
+          # 배당 API 키. 저장소에는 없고 GitHub 비밀값에서만 옵니다.
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python3 scripts/run.py "${{ github.event.inputs.slot }}"
+
+      - name: 바뀐 것만 커밋
+        run: |
+          git config user.name  "mvm-bot"
+          git config user.email "mvm-bot@users.noreply.github.com"
+          git add -A data docs
+          if git diff --cached --quiet; then
+            echo "바뀐 게 없습니다 (예정된 일 없는 시각이거나 경기가 없는 날)"
+          else
+            git commit -m "갱신 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST')"
+            git push
+          fi
