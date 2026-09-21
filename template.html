@@ -1,0 +1,2406 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>모델 대 시장</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --paper:#F4F5F3; --panel:#FFFFFF; --panel-alt:#E9EBE7;
+    --ink:#16181A; --ink-soft:#4B5157; --ink-faint:#7E858B;
+    --line:#D2D6D2; --line-soft:#E4E7E3;
+    --accent:#3E4C6B;
+    --model:#2A78D6; --model-dim:#DDE8F8;
+    --market:#EB6834; --market-dim:#FBE3D8;
+    --good:#1BAF7A; --good-dim:#D8F0E6;
+    --bad:#E34948; --bad-dim:#FADEDE;
+    --warn:#EDA100; --warn-dim:#FBEFD2;
+    --shadow:0 1px 2px rgba(22,24,26,.05),0 6px 18px rgba(22,24,26,.07);
+    --radius:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#111315; --panel:#1A1D20; --panel-alt:#232729;
+      --ink:#E9ECEE; --ink-soft:#A6ADB3; --ink-faint:#798086;
+      --line:#333940; --line-soft:#262B30;
+      --accent:#8FA3C8;
+      --model:#3987E5; --model-dim:#17263B;
+      --market:#D95926; --market-dim:#38220F;
+      --good:#199E70; --good-dim:#102E23;
+      --bad:#E66767; --bad-dim:#361D1D;
+      --warn:#C98500; --warn-dim:#33280C;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#111315; --panel:#1A1D20; --panel-alt:#232729;
+    --ink:#E9ECEE; --ink-soft:#A6ADB3; --ink-faint:#798086;
+    --line:#333940; --line-soft:#262B30;
+    --accent:#8FA3C8;
+    --model:#3987E5; --model-dim:#17263B;
+    --market:#D95926; --market-dim:#38220F;
+    --good:#199E70; --good-dim:#102E23;
+    --bad:#E66767; --bad-dim:#361D1D;
+    --warn:#C98500; --warn-dim:#33280C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"Manrope","Noto Sans KR",system-ui,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 20px 72px}
+
+  header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;
+    gap:12px 20px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:20px}
+  h1{font-family:"Sora","Noto Sans KR",sans-serif;font-weight:700;
+    font-size:clamp(1.6rem,3.2vw,2.1rem);letter-spacing:-.02em;margin:0;text-wrap:balance}
+  .sub{color:var(--ink-soft);font-size:.94rem;max-width:52ch;margin-top:6px}
+  .datechip{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px;white-space:nowrap}
+  .sporttabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .sporttab{font-family:"Sora","Noto Sans KR",sans-serif;font-weight:600;font-size:.92rem;
+    padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .sporttab:hover{border-color:var(--accent)}
+  .sporttab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .sporttab .cnt{font-family:"IBM Plex Mono",monospace;font-size:.76rem;opacity:.85;margin-left:5px}
+
+  .notice{display:flex;gap:10px;align-items:flex-start;background:var(--warn-dim);
+    border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);border-radius:var(--radius);
+    padding:13px 16px;font-size:.88rem;margin-bottom:22px;color:var(--ink)}
+  .notice svg{flex:none;margin-top:3px;color:var(--warn)}
+  .notice b{color:var(--warn)}
+
+  /* ---- scoreboard ---- */
+  .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;box-shadow:var(--shadow)}
+  .stat .k{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-faint)}
+  .stat .v{font-family:"IBM Plex Mono",monospace;font-size:1.55rem;font-weight:600;
+    font-variant-numeric:tabular-nums;margin:3px 0 0;letter-spacing:-.02em}
+  .stat .v.model{color:var(--model)} .stat .v.market{color:var(--market)}
+  .stat .d{font-size:.78rem;color:var(--ink-soft)}
+
+  /* ---- game cards ---- */
+  .games{display:flex;flex-direction:column;gap:14px}
+  /* ---- pick badge & tier ---- */
+  .pickwrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--panel-alt);border-radius:9px;padding:9px 12px;margin-bottom:12px}
+  .picklabel{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-faint)}
+  .pickteam{font-family:"Sora",sans-serif;font-weight:700;font-size:1.08rem;color:var(--model)}
+  .pickpct{font-family:"IBM Plex Mono",monospace;font-size:.84rem;color:var(--ink-soft);
+    font-variant-numeric:tabular-nums}
+  .tier{font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.06em;
+    padding:3px 9px;border-radius:999px;white-space:nowrap;margin-left:auto}
+  .tier.a{background:var(--good-dim);color:var(--good)}
+  .tier.b{background:var(--model-dim);color:var(--model)}
+  .tier.c{background:var(--warn-dim);color:var(--warn)}
+  .tier.d{background:var(--bad-dim);color:var(--bad)}
+  .tier.none{background:transparent;color:var(--ink-faint);border:1px dashed var(--line)}
+  /* 등급 옆 차이 표시 -- 모델과 시장이 얼마나·어느 쪽으로 벌어졌나 */
+  .gapnote{font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-variant-numeric:tabular-nums;
+    margin-top:3px;white-space:nowrap}
+  .gapnote.up{color:var(--model)} .gapnote.dn{color:var(--market)}
+  .gapnote.eq{color:var(--ink-faint)} .gapnote.op{color:var(--bad);font-weight:600}
+  /* 등급 읽는 법 */
+  .gradekey{background:var(--panel-alt);border:1px solid var(--line);border-radius:9px;
+    padding:12px 14px;margin:0 18px 14px}
+  .gradekey summary{margin:0}
+  .gradekey p{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.6}
+  .gradekey p+p{margin-top:7px}
+  .gradekey b{color:var(--ink)}
+  .gradekey table{min-width:0;width:100%;margin:8px 0 2px}
+  .gradekey th,.gradekey td{padding:4px 8px;font-size:.78rem}
+  .gradekey thead th{border-bottom:1px solid var(--line)}
+  .gradekey td:first-child{white-space:nowrap}
+  .gradekey .gt{font-family:"IBM Plex Mono",monospace;font-weight:700}
+  .gradekey .gt.a{color:var(--good)} .gradekey .gt.b{color:var(--model)}
+  .gradekey .gt.c{color:var(--warn)} .gradekey .gt.d{color:var(--bad)}
+  .gradekey td.mk{color:var(--market);font-weight:700}
+  tr.startedRow{opacity:.55}
+  .startedTag{font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--ink-faint);
+    border:1px dashed var(--line);border-radius:999px;padding:1px 7px;margin-left:4px;white-space:nowrap}
+
+  /* ---- 오늘의 결과 ---- */
+  .todayres{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px}
+  .todayres h2{margin:0 0 2px}
+  .todayres .hint{color:var(--ink-faint);font-size:.84rem;margin:0 0 12px}
+  .tr-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:10px;margin-bottom:14px}
+  .tr-card{background:var(--panel-alt);border-radius:9px;padding:10px 13px}
+  .tr-card .k{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-faint)}
+  .tr-card .v{font-family:"IBM Plex Mono",monospace;font-size:1.4rem;font-weight:600;
+    font-variant-numeric:tabular-nums;margin:2px 0 0;letter-spacing:-.02em}
+  .tr-card .d{font-size:.74rem;color:var(--ink-soft)}
+  .todayres table{min-width:600px}
+  .todayres th,.todayres td{padding:7px 12px;text-align:left}
+  .todayres th:nth-child(n+5),.todayres td:nth-child(n+5){text-align:right}
+  .todayres td.pk{font-weight:700;color:var(--model)}
+  .tr-res{font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:700;
+    padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .tr-res.hit{background:var(--good-dim);color:var(--good)}
+  .tr-res.miss{background:var(--bad-dim);color:var(--bad)}
+  .tr-res.wait{background:transparent;color:var(--ink-faint);border:1px dashed var(--line)}
+  .tr-lg{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-faint)}
+  .tr-ou{font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-left:5px}
+
+  /* ---- 성적표 ---- */
+  .record{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px 20px;margin-top:36px}
+  .rec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .rec-head h2{margin:0}
+  .rec-sub{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-faint)}
+  .rec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+  .rec-card{background:var(--panel-alt);border-radius:9px;padding:12px 14px}
+  .rec-card .k{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-faint)}
+  .rec-card .v{font-family:"IBM Plex Mono",monospace;font-size:1.5rem;font-weight:600;
+    font-variant-numeric:tabular-nums;margin:2px 0 0}
+  .rec-card .d{font-size:.76rem;color:var(--ink-soft)}
+  .rec-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .rec-lab{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .record table{min-width:0}
+  .rec-log{margin-top:16px}
+  .rec-log summary{cursor:pointer;font-size:.84rem;color:var(--accent);font-weight:600;padding:6px 0}
+  td.hit{color:var(--good);font-weight:700}td.miss{color:var(--bad);font-weight:700}
+
+  /* ---- 오늘의 픽: 한 줄로 말해주기 ---- */
+  .picklist{padding:0 18px 4px}
+  .pk-row{display:flex;gap:11px;align-items:flex-start;padding:12px 0;
+    border-top:1px solid var(--line-soft)}
+  .pk-row:first-child{border-top:0}
+  .pk-row.past{opacity:.5}
+  .pk-dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:7px}
+  .pk-row.a .pk-dot{background:var(--good)} .pk-row.b .pk-dot{background:var(--model)}
+  .pk-row.c .pk-dot{background:var(--warn)} .pk-row.d .pk-dot{background:var(--bad)}
+  .pk-row.none .pk-dot{background:transparent;border:2px solid var(--line)}
+  .pk-body{min-width:0;flex:1}
+  .pk-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px}
+  .pk-time{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-faint);
+    font-variant-numeric:tabular-nums}
+  .pk-lg{font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:4px;padding:0 5px}
+  .pk-match{font-family:"Sora","Noto Sans KR",sans-serif;font-weight:600;font-size:1rem}
+  .pk-say{font-size:.95rem;line-height:1.55;color:var(--ink-soft)}
+  .pk-say b{color:var(--model);font-weight:700;font-size:1.02rem}
+  .pk-say .warnw{color:var(--market);font-weight:700}
+  .pk-say .badw{color:var(--bad);font-weight:700}
+  .pk-num{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--ink-faint);
+    margin-top:4px;font-variant-numeric:tabular-nums}
+  .pk-ou{font-size:.8rem;color:var(--ink-soft);margin-top:4px}
+  .pk-res{font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:700;
+    padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .pk-res.hit{background:var(--good-dim);color:var(--good)}
+  .pk-res.miss{background:var(--bad-dim);color:var(--bad)}
+
+  /* ---- summary ---- */
+  .summary{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden}
+  .summary h2{padding:14px 18px 0;margin:0}
+  .summary .hint{padding:2px 18px 12px;color:var(--ink-faint);font-size:.84rem;margin:0}
+  .sum-scroll{overflow-x:auto}
+  .summary table{min-width:700px}
+  .summary td:first-child{min-width:230px}
+  .sumtime{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-faint);
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-right:2px}
+  .summary td.pick{font-weight:700;color:var(--model)}
+
+  .soccer{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden;padding-bottom:14px}
+  .soccer h2{padding:14px 18px 0;margin:0}
+  .soccer .hint{padding:2px 18px 12px;color:var(--ink-faint);font-size:.84rem;margin:0}
+  .soccer .sum-scroll{padding:0 18px}
+  .soccer details{padding:0 18px}
+  .soccer tr.startedRow{opacity:.55}
+  .soccer td.lgtag{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-faint);white-space:nowrap}
+
+  .lg-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    margin:14px 0 -2px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  .lg-head:first-child{margin-top:0}
+  .lg-name{font-family:"Sora",sans-serif;font-weight:700;font-size:1.14rem;letter-spacing:-.01em}
+  .lg-note{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-faint)}
+  .game{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px}
+  .game.settled{opacity:.82}
+  .game.started{opacity:.7}
+  .game.cancelled{opacity:.55;border-style:dashed}
+  .status.cancel{color:var(--bad);border-color:var(--bad)}
+  .g-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .matchup{font-family:"Sora",sans-serif;font-weight:600;font-size:1.06rem}
+  .matchup .at{color:var(--ink-faint);font-weight:400;margin:0 6px}
+  .sp{font-size:.8rem;color:var(--ink-soft);margin-top:3px}
+  .sp b{color:var(--ink);font-weight:600}
+  .status{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);
+    border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+  .probs{display:grid;grid-template-columns:64px 1fr 58px;gap:10px;align-items:center;margin-bottom:8px}
+  .p-lab{font-size:.78rem;color:var(--ink-soft);font-weight:600}
+  .p-lab.model{color:var(--model)} .p-lab.market{color:var(--market)}
+  .p-track{position:relative;height:16px;background:var(--panel-alt);border-radius:5px;overflow:hidden}
+  .p-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px 0 0 5px;transition:width .2s ease}
+  .p-fill.model{background:var(--model)} .p-fill.market{background:var(--market)}
+  .p-mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--ink-faint);opacity:.5}
+  .p-val{font-family:"IBM Plex Mono",monospace;font-size:.84rem;font-weight:600;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .p-empty{font-size:.78rem;color:var(--ink-faint);font-style:italic}
+  .probs3{display:grid;grid-template-columns:64px 1fr;gap:2px 10px;align-items:center;margin-bottom:8px}
+  .probs3 .p-lab{grid-row:1}
+  .seg-track{display:flex;height:16px;border-radius:5px;overflow:hidden;background:var(--panel-alt)}
+  .seg-fill{height:100%}
+  .seg-home{background:var(--model)} .seg-draw{background:var(--ink-faint)} .seg-away{background:var(--market)}
+  .seg-vals{grid-column:2;font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-soft)}
+  .seg-legend{display:flex;gap:14px;font-size:.72rem;color:var(--ink-faint);margin:2px 0 10px}
+  .seg-legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .seg-legend .lh::before{background:var(--model)} .seg-legend .ld::before{background:var(--ink-faint)} .seg-legend .la::before{background:var(--market)}
+
+  .oddsrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;
+    padding-top:12px;border-top:1px dashed var(--line)}
+  .oddsrow label{font-size:.78rem;color:var(--ink-soft);white-space:nowrap}
+  .oddsrow input{width:78px;font:inherit;font-family:"IBM Plex Mono",monospace;font-size:.84rem;
+    padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:var(--panel-alt);color:var(--ink)}
+  .oddsrow input:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+  /* 언더/오버 (NPB만 -- 검증을 통과한 리그가 NPB뿐입니다) */
+  .ourow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;
+    padding:9px 11px;border-radius:8px;background:var(--panel-alt);border:1px solid var(--line)}
+  .ou-lab{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+  .ou-tot{font-family:"IBM Plex Mono",monospace;font-size:1.02rem;font-weight:600;
+    font-variant-numeric:tabular-nums}
+  .ou-pick{font-size:.82rem;font-weight:600;padding:3px 9px;border-radius:999px;
+    border:1px solid var(--line)}
+  .ou-pick.over{color:var(--market);border-color:var(--market);background:var(--market-dim)}
+  .ou-pick.under{color:var(--model);border-color:var(--model);background:var(--model-dim)}
+  .ou-alt{font-size:.76rem;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .ou-thin{font-size:.74rem;color:var(--bad)}
+  .ou-in{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .ou-in label{font-size:.76rem;color:var(--ink-soft);white-space:nowrap}
+  .ou-in input{width:62px;font:inherit;font-family:"IBM Plex Mono",monospace;font-size:.84rem;
+    padding:5px 8px;border-radius:7px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);text-align:center}
+  .ou-in input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .ou-verdict{width:100%;margin-top:8px;font-size:.83rem;line-height:1.55;color:var(--ink-soft)}
+  .ou-verdict b{color:var(--ink)}
+  .ou-mkt{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;
+    padding:8px 11px;border-radius:8px;background:var(--panel-alt);
+    border:1px dashed var(--line);font-size:.82rem;color:var(--ink-soft)}
+
+  .verdictline{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.86rem;display:none}
+  .verdictline.on{display:block}
+  .verdictline.agree{background:var(--good-dim);border:1px solid color-mix(in srgb,var(--good) 38%,transparent)}
+  .verdictline.mild{background:var(--panel-alt);border:1px solid var(--line)}
+  .verdictline.warn{background:var(--warn-dim);border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}
+  .verdictline.danger{background:var(--bad-dim);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+  .verdictline .vt{font-weight:700;display:block;margin-bottom:2px}
+
+  .settle{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;
+    padding-top:12px;border-top:1px dashed var(--line)}
+  .settle span.q{font-size:.78rem;color:var(--ink-soft);margin-right:2px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);padding:6px 13px;font-size:.84rem;font-weight:600;
+    transition:border-color .13s ease,background .13s ease}
+  button:hover{border-color:var(--accent)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.on-good{background:var(--good-dim);border-color:var(--good);color:var(--good)}
+  button.on-bad{background:var(--bad-dim);border-color:var(--bad);color:var(--bad)}
+  button.ghost{background:transparent;color:var(--ink-faint);font-weight:500}
+
+  .result{font-size:.84rem;font-weight:600}
+  .result.hit{color:var(--good)} .result.miss{color:var(--bad)}
+
+
+  /* ---- 경기 심층 분석 (펼침) ---- */
+  .deep{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+  .deep>summary{cursor:pointer;font-size:.84rem;font-weight:600;color:var(--accent);
+    list-style:none;display:flex;align-items:center;gap:6px}
+  .deep>summary::-webkit-details-marker{display:none}
+  .deep>summary::before{content:"▸";font-size:.8rem;transition:transform .15s}
+  .deep[open]>summary::before{transform:rotate(90deg)}
+  .deep-body{margin-top:12px;display:grid;gap:14px}
+  .dsec{background:var(--panel-alt);border-radius:9px;padding:11px 13px}
+  .dsec h4{margin:0 0 8px;font-family:"Sora","Noto Sans KR",sans-serif;font-size:.82rem;
+    font-weight:700;color:var(--ink);letter-spacing:.01em}
+  .dsec table{min-width:0;width:100%}
+  .dsec th,.dsec td{padding:3px 6px;font-size:.78rem}
+  .dsec thead th{border-bottom:1px solid var(--line);font-size:.64rem}
+  .dsec tbody tr+tr td{border-top:1px solid var(--line-soft)}
+  .dcol2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .dteam{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;
+    color:var(--ink-faint);text-transform:uppercase;margin-bottom:4px}
+  .dbetter{color:var(--good);font-weight:700}
+  .dthin{color:var(--bad);font-weight:600;font-size:.72rem}
+  .dnote{font-size:.78rem;color:var(--ink-faint);line-height:1.55}
+  .dnote b{color:var(--ink-soft)}
+
+
+  .dtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .dtab{font-family:"Sora","Noto Sans KR",sans-serif;font-size:.8rem;font-weight:600;
+    padding:5px 13px;border-radius:999px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink-faint)}
+  .dtab:hover{border-color:var(--accent)}
+  .dtab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dmono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .dsub{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-faint);margin:12px 0 5px}
+
+  /* ---- reference table ---- */
+  section.ref{margin-top:36px}
+  h2{font-family:"Sora","Noto Sans KR",sans-serif;font-size:1.16rem;font-weight:600;margin:0 0 4px}
+  .sec-sub{color:var(--ink-faint);font-size:.86rem;margin:0 0 14px}
+  .tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:420px}
+  th,td{padding:8px 14px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-faint);font-weight:500;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody tr+tr td{border-top:1px solid var(--line-soft)}
+  tbody td{font-family:"IBM Plex Mono",monospace;font-size:.82rem;font-variant-numeric:tabular-nums}
+  tbody td:first-child{font-family:"Manrope","Noto Sans KR",sans-serif}
+  td.win{color:var(--good);font-weight:700}
+  td.lose{color:var(--bad);font-weight:700}
+
+  footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line);
+    color:var(--ink-faint);font-size:.83rem}
+  footer p{margin:0 0 8px}
+  code{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--panel-alt);
+    padding:1px 5px;border-radius:4px}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>모델 대 시장</h1>
+      <div class="sub">모델 확률과 배당이 말하는 확률을 나란히 놓고, 둘이 엇갈릴 때 어느 쪽이 맞는지 직접 세어보는 도구입니다.</div>
+    </div>
+    <span class="datechip" id="dateChip">{{dateChip}}</span>
+      <span class="datechip" id="runChip" title="결과 마감·배당 스냅샷처럼 경기 목록을 안 건드리는 작업도 여기 찍힙니다">{{runChip}}</span>
+  </header>
+
+  <div class="sporttabs" id="sportTabs">
+    <button class="sporttab" id="tabBaseball" data-target="baseballGroup">⚾ 야구 (MLB·KBO·NPB)</button>
+    <button class="sporttab" id="tabSoccer" data-target="soccerSection">⚽ 축구 (4대리그)</button>
+  </div>
+
+  <div id="baseballGroup">
+
+  <div class="notice">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r=".3" fill="currentColor"/></svg>
+    <div><b>배팅 조언이 아닙니다.</b> 모델 확률은 팀 Elo·최근 성적(MLB는 선발투수 포함)에서 나온
+    통계 추정치이고, 세 리그 모두 홀드아웃 정확도가 55% 근처였습니다. 아래 표가 보여주듯
+    <b>모델이 시장과 크게 엇갈릴수록 모델이 틀렸습니다.</b> 이 도구는 그 사실을 형님이 직접 확인하는 용도입니다.</div>
+  </div>
+
+  <div class="board">
+    <div class="stat"><div class="k">기록한 경기</div><div class="v" id="stN">0</div><div class="d">결과 입력 완료</div></div>
+    <div class="stat"><div class="k">모델 적중률</div><div class="v model" id="stModel">—</div><div class="d" id="stModelD">아직 없음</div></div>
+    <div class="stat"><div class="k">시장 적중률</div><div class="v market" id="stMarket">—</div><div class="d" id="stMarketD">배당 입력 시 집계</div></div>
+    <div class="stat"><div class="k">둘이 엇갈린 경기</div><div class="v" id="stDis">0</div><div class="d" id="stDisD">—</div></div>
+  </div>
+
+  <div class="todayres" id="todayResult"></div>
+
+  <div class="summary">
+    <h2>오늘의 픽</h2>
+    <p class="hint">모델이 고른 쪽과 시장(배당)이 고른 쪽을 한 줄로 붙여 놓았습니다.
+      <b>왼쪽 점 색만 보셔도 됩니다</b> —
+      <span style="color:var(--good);font-weight:700">●</span> 둘이 같음 ·
+      <span style="color:var(--model);font-weight:700">●</span> 조금 벌어짐 ·
+      <span style="color:var(--warn);font-weight:700">●</span> 많이 벌어짐 ·
+      <span style="color:var(--bad);font-weight:700">●</span> 서로 반대.
+      <b>벌어질수록 과거엔 시장이 맞았습니다.</b></p>
+    <details class="gradekey" style="padding:10px 14px">
+      <summary style="cursor:pointer;font-size:.84rem;color:var(--accent);font-weight:600">
+        점 색이 무슨 뜻인지 · 숫자 근거 보기</summary>
+      <div style="margin-top:10px">
+      <p><b>등급 = 모델 확률과 시장 확률이 얼마나 벌어졌나.</b> 아래 숫자는 홀드아웃
+        15,536경기에서 실제로 세어본 것입니다.</p>
+      <div class="sum-scroll"><table>
+        <thead><tr><th>차이</th><th>등급</th><th>모델 적중</th><th>시장 적중</th><th>읽는 법</th></tr></thead>
+        <tbody>
+          <tr><td>5%p 미만</td><td class="gt a">A</td><td>57.2%</td><td>57.1%</td>
+            <td>둘이 같은 말 — 모델 확률을 그대로 믿어도 됩니다</td></tr>
+          <tr><td>5~10%p</td><td class="gt b">B</td><td>56.3%</td><td class="mk">60.3%</td>
+            <td>시장이 4%p 더 맞았습니다</td></tr>
+          <tr><td>10~20%p</td><td class="gt c">C</td><td>55.1%</td><td class="mk">63.3%</td>
+            <td>시장이 8%p 더 맞았습니다</td></tr>
+          <tr><td>20%p 이상·반대</td><td class="gt d">D</td><td>44.1%</td><td class="mk">70.6%</td>
+            <td>모델이 동전 던지기보다 못했습니다</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>A는 "여기 걸어라"가 아닙니다.</b> 모델과 시장이 같은 말을 한다는 건 배당도 그만큼
+        짜다는 뜻입니다. A는 "모델이 헛소리를 안 하고 있다"는 확인이지 기회가 아닙니다.</p>
+      <p>등급 밑의 <span class="gapnote up" style="display:inline">모델 +6.4%p</span> 는
+        <b>모델이 시장보다 그 팀을 그만큼 높게 본다</b>는 뜻입니다 — 추천이 나오는 자리인데,
+        과거 데이터에서 그 자리에서 진 건 모델이었습니다.
+        <span class="gapnote dn" style="display:inline">시장 +6.9%p</span> 는 반대로
+        모델이 시장보다 조심스럽다는 뜻입니다.</p>
+      </div>
+    </details>
+    <div class="picklist" id="pickList"></div>
+  </div>
+
+  <div class="games" id="games"></div>
+
+  <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="ghost" id="btnReset">기록 전체 지우기</button>
+    <span id="resetHint" style="font-size:.8rem;color:var(--bad);align-self:center;display:none;">한 번 더 누르면 지워집니다</span>
+  </div>
+
+
+
+  <section class="record" id="recordSection">
+    <div class="rec-head">
+      <h2>내 픽 성적표</h2>
+      <span class="rec-sub" id="recSub">아직 정산된 경기가 없습니다</span>
+    </div>
+    <p class="hint" style="color:var(--ink-faint);font-size:.84rem;margin:0 0 12px">
+      <b style="color:var(--ink)">숫자는 50%가 아니라 "기준선"과 비교해서 보세요.</b>
+      야구는 홈팀이 그냥 잘 이기고, 7.5 기준선에서는 언더가 그냥 더 많이 나옵니다.
+      그래서 "아무 생각 없이 찍었을 때"를 나란히 놓았습니다 — 모델의 진짜 실력은 그 차이입니다.</p>
+    <div class="rec-cards" id="recCards"></div>
+    <div id="recOU"></div>
+    <div id="clvBox"></div>
+    <div class="rec-lab" style="margin-top:16px">월별 적중률 — "요즘은 어떤가"</div>
+    <div class="sum-scroll"><table id="recMonth"><tbody id="recByMonth"></tbody></table></div>
+    <div class="rec-split">
+      <div>
+        <div class="rec-lab">리그별</div>
+        <div class="sum-scroll"><table><thead><tr><th>리그</th><th>경기</th><th>적중</th><th>적중률</th><th>95% CI</th></tr></thead><tbody id="recByLg"></tbody></table></div>
+      </div>
+      <div>
+        <div class="rec-lab">모델 확신도별 — 확신이 높을수록 잘 맞아야 정상입니다</div>
+        <div class="sum-scroll"><table><thead><tr><th>확신 구간</th><th>경기</th><th>적중률</th><th>평균 예측</th><th>차이</th></tr></thead><tbody id="recByConf"></tbody></table></div>
+      </div>
+    </div>
+    <details class="rec-log"><summary>정산된 경기 전부 보기</summary>
+      <div class="sum-scroll"><table><thead><tr><th>날짜</th><th>리그</th><th>경기</th><th>픽</th><th>확률</th><th>결과</th><th></th></tr></thead><tbody id="recLog"></tbody></table></div>
+      <p class="rec-lab" style="margin-top:10px;text-transform:none;letter-spacing:0;font-size:.78rem;">결과는 형님이 누르실 필요 없습니다 — KBO·NPB는 다음날 오후, MLB는 매일 자정 갱신 때 제가 각 리그 공식 기록에서 받아 자동으로 채웁니다. 2026-04-01 ~ 08-27 구간은 재구성한 기록입니다: 각 경기를 그 경기 이전 데이터만으로 다시 예측해 실제 결과와 맞춰본 것이라 미래를 훔쳐보지 않았습니다.</p>
+    </details>
+  </section>
+
+  <section class="ref">
+    <h2>엇갈릴 때 누가 맞았나</h2>
+    <p class="sec-sub">유럽 축구 오버/언더 15,536경기 홀드아웃에서 실제로 세어본 결과입니다</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>모델·시장 차이</th><th>경기</th><th>모델 적중</th><th>시장 적중</th></tr></thead>
+      <tbody>
+        <tr><td>거의 일치 (5%p 미만)</td><td>9,355</td><td class="win">57.2%</td><td>57.1%</td></tr>
+        <tr><td>5–10%p</td><td>4,517</td><td>56.3%</td><td class="win">60.3%</td></tr>
+        <tr><td>10–20%p</td><td>1,596</td><td>55.1%</td><td class="win">63.3%</td></tr>
+        <tr><td>20%p 이상</td><td>68</td><td class="lose">44.1%</td><td class="win">70.6%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sec-sub" style="margin-top:12px;">
+      추천이란 건 정의상 모델이 시장과 다르게 볼 때 나옵니다. 그런데 그 차이가 커질수록
+      모델이 틀렸습니다 — 20%p 이상 엇갈린 구간에서는 동전 던지기보다도 못했습니다.
+      이 수치는 축구 오버/언더에서 잰 것이고 MLB에서 직접 재본 건 아니지만,
+      MLB 승패에서도 모델이 시장을 못 넘긴 건 같습니다.
+    </p>
+  </section>
+  </div>
+
+  <section class="soccer" id="soccerSection">
+    <h2>⚽ 축구 (5대 리그) — 승무패</h2>
+    <p class="hint">EPL·라리가·분데스리가·세리에A·리그앙. 다이슨-콜스 포아송 모델, 2018~2026 시즌
+      데이터로 홀드아웃 검증(2023-24~2025-26, 4,310경기) — <b>'무조건 홈승' 대비 전 리그 +7~12%p,
+      캘리브레이션 오차 2.35%p</b>. 리그앙은 2026-09-07에 같은 절차로 따로 검증해
+      통과시켰습니다(918경기, +8.17%p, 95% CI +4.68~+11.66%p). 시장(배당)은 프리매치 라인만 표시하고 경기가 시작하면 더 갱신하지
+      않습니다(라이브 배당은 이미 스코어를 반영해 비교가 안 됩니다).
+      <b>오버/언더는 여기 없습니다</b> — 같은 방식으로 검증했더니 4개리그 중 2곳(EPL·분데스리가)에서
+      과거빈도 기준선 대비 개선이 사실상 0이라 MLB·KBO 오버언더와 같은 이유로 못 냈습니다.</p>
+    <div class="summary" style="box-shadow:none;border:none;margin-bottom:8px">
+      <h2 style="padding:0;font-size:1rem">오늘의 축구 픽</h2>
+      <p class="hint" style="padding:2px 0 10px">야구와 같은 방식입니다.
+        <b>왼쪽 점 색만 보셔도 됩니다</b> —
+        <span style="color:var(--good);font-weight:700">●</span> 둘이 같음 ·
+        <span style="color:var(--model);font-weight:700">●</span> 조금 벌어짐 ·
+        <span style="color:var(--warn);font-weight:700">●</span> 많이 벌어짐 ·
+        <span style="color:var(--bad);font-weight:700">●</span> 서로 반대.
+        오버/언더는 검증 실패로 이 리그들엔 없습니다.</p>
+      <details class="gradekey" style="margin:0 0 12px;padding:10px 14px">
+        <summary style="cursor:pointer;font-size:.84rem;color:var(--accent);font-weight:600">
+          점 색이 무슨 뜻인지 · 숫자 근거 보기</summary>
+        <div style="margin-top:10px">
+        <p><b>등급 = 모델과 시장이 얼마나 벌어졌나.</b> 축구 홀드아웃 4,310경기에서 세어본 결과입니다.</p>
+        <div class="sum-scroll"><table>
+          <thead><tr><th>차이</th><th>등급</th><th>모델 적중</th><th>시장 적중</th></tr></thead>
+          <tbody>
+            <tr><td>5%p 미만</td><td class="gt a">A</td><td>53.7%</td><td class="mk">54.1%</td></tr>
+            <tr><td>5~10%p</td><td class="gt b">B</td><td>53.1%</td><td class="mk">54.3%</td></tr>
+            <tr><td>10~20%p</td><td class="gt c">C</td><td>44.9%</td><td class="mk">54.7%</td></tr>
+            <tr><td>20%p 이상</td><td class="gt d">D</td><td>37.5%</td><td class="mk">47.5%</td></tr>
+          </tbody>
+        </table></div>
+        <p>야구와 같습니다 — <b>벌어질수록 시장이 맞았습니다.</b>
+          등급 밑 <span class="gapnote up" style="display:inline">모델 +x%p</span> 는 모델이 시장보다
+          그 쪽을 높게 본다는 뜻이고, 그게 바로 과거에 모델이 지던 자리입니다.</p>
+        </div>
+      </details>
+      <div id="soccerFresh"></div>
+      <div class="picklist" id="soccerPickList" style="padding:0"></div>
+    </div>
+
+    <div class="games" id="soccerGames"></div>
+    <div id="soccerRecordBox" style="padding:0 18px"></div>
+    <details style="margin-top:12px;">
+      <summary style="cursor:pointer;color:var(--ink-soft);font-size:.85rem;">모델·시장 엇갈릴 때 누가 맞았나 (축구 1X2, 홀드아웃 4,310경기 중 배당 있는 4,310경기)</summary>
+      <div class="tablewrap" style="margin-top:8px;"><table>
+        <thead><tr><th>모델·시장 차이 (홈승 확률 기준)</th><th>경기</th><th>모델 적중</th><th>시장 적중</th></tr></thead>
+        <tbody>
+          <tr><td>거의 일치 (5%p 미만)</td><td>2,549</td><td>53.7%</td><td class="win">54.1%</td></tr>
+          <tr><td>5–10%p</td><td>1,242</td><td>53.1%</td><td class="win">54.3%</td></tr>
+          <tr><td>10–20%p</td><td>479</td><td>44.9%</td><td class="win">54.7%</td></tr>
+          <tr><td>20%p 이상</td><td>40</td><td class="lose">37.5%</td><td class="win">47.5%</td></tr>
+        </tbody>
+      </table></div>
+      <p class="sec-sub" style="margin-top:8px;">야구와 같은 패턴입니다 — 모델과 시장이 크게 엇갈릴수록 시장이 맞았습니다.
+        등급 열은 이 표를 그대로 반영합니다.</p>
+    </details>
+  </section>
+
+  <footer>
+    <p>모델: 팀 Elo + 최근 25·60경기 성적 + 선발투수 최근 15등판 실점·승률. 2000–2022 학습,
+      2023–2026 검증(9,234경기)에서 정확도 55.4%, BSS 1.84%. 선발투수를 빼면 BSS 1.59%로 떨어집니다.</p>
+    <p>배당은 형님이 직접 보고 입력하는 값입니다 — 이 페이지는 어떤 사이트도 자동 수집하지 않습니다.
+      시장 확률은 <code>(1/홈배당) ÷ (1/홈배당 + 1/원정배당)</code>으로 오버라운드를 제거해 계산합니다.</p>
+    <p>입력한 내용은 이 브라우저에만 저장됩니다. 다른 기기와 공유되지 않고 Claude로 전송되지 않습니다.</p>
+  </footer>
+</div>
+
+
+<script>
+/* 경기 심층 분석. 자료는 deepStats 블록(하루 한 번 MLB 공개 API)과 경기별 luH/luA(확정 타순).
+   여기서 하는 일은 '설명'이지 '예측'이 아닙니다 -- 아래 숫자는 확률 계산에 안 들어갑니다.
+   모델이 쓰는 건 Elo·최근 성적·선발 최근 실점뿐입니다.
+   2026-09-21 최초 · 2026-09-21 탭 구조 + 확정 라인업 추가. */
+(function () {
+  "use strict";
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g,
+      function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; });
+  }
+  function num(x) { var v = parseFloat(x); return isFinite(v) ? v : null; }
+  function bat(h) { return h && h[0] === "L" ? "좌" : h && h[0] === "S" ? "양" : h && h[0] === "R" ? "우" : ""; }
+  function thr(h) { return h && h[1] === "L" ? "좌" : h && h[1] === "R" ? "우" : ""; }
+
+  /* ---------- 탭 1: 선발 맞대결 ---------- */
+  function tabSp(g, aS, hS) {
+    if (!aS && !hS) return '<div class="dnote">선발 기록이 아직 없습니다.</div>';
+    var rows = [["ERA","era","low"],["WHIP","whip","low"],["피안타율","baa","low"],
+                ["K/9","k9","high"],["BB/9","bb9","low"],["피홈런","hr","low"]];
+    var out = '<table><thead><tr><th>' + esc(g.awayFull) + '</th>' +
+              '<th style="text-align:center">항목</th>' +
+              '<th style="text-align:right">' + esc(g.homeFull) + '</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      var av = num(aS && aS[r[1]]), hv = num(hS && hS[r[1]]), aw = "", hw = "";
+      if (av !== null && hv !== null && av !== hv) {
+        var ab = r[2] === "low" ? av < hv : av > hv;
+        aw = ab ? ' class="dbetter"' : ''; hw = ab ? '' : ' class="dbetter"';
+      }
+      out += '<tr><td' + aw + '>' + (av === null ? "—" : aS[r[1]]) + '</td>' +
+             '<td style="text-align:center;color:var(--ink-faint)">' + r[0] + '</td>' +
+             '<td style="text-align:right"' + hw + '>' + (hv === null ? "—" : hS[r[1]]) + '</td></tr>';
+    });
+    function samp(s) {
+      if (!s) return "기록 없음";
+      var t = s.ip + "이닝 " + s.gs + "선발";
+      return (s.ipf < 40 || s.gs < 8) ? '<span class="dthin">' + t + ' — 표본 얇음</span>' : t;
+    }
+    out += '<tr><td>' + samp(aS) + '</td>' +
+           '<td style="text-align:center;color:var(--ink-faint)">표본</td>' +
+           '<td style="text-align:right">' + samp(hS) + '</td></tr></tbody></table>';
+    if ((aS && aS.ipf < 40) || (hS && hS.ipf < 40)) {
+      out += '<div class="dnote" style="margin-top:8px">' +
+        '<b>표본이 얇은 투수는 숫자를 믿지 마세요.</b> 몇 경기 안 던진 ERA는 운이 대부분입니다.</div>';
+    }
+    return out;
+  }
+
+  /* ---------- 탭 2: 불펜 ---------- */
+  function penOne(t, name) {
+    if (!t || !t.pen || !t.pen.length) return '<div class="dnote">기록 없음</div>';
+    var s = '<div class="dteam">' + esc(name) + ' · 평균 ERA ' +
+            (t.penEra == null ? "—" : t.penEra) + '</div><table><tbody>';
+    t.pen.forEach(function (p) {
+      s += '<tr><td>' + esc(p.n) + '</td><td class="dmono" style="text-align:right">' +
+           p.era.toFixed(2) + '</td>' +
+           '<td style="text-align:right;color:var(--ink-faint)">' + p.ip + '이닝 · WHIP ' +
+           (p.whip || "—") + '</td></tr>';
+    });
+    return s + '</tbody></table>';
+  }
+  function tabPen(g, at, ht) {
+    var s = '<div class="dcol2"><div>' + penOne(at, g.awayFull) + '</div>' +
+            '<div>' + penOne(ht, g.homeFull) + '</div></div>';
+    var a = at && at.penEra, h = ht && ht.penEra;
+    if (a != null && h != null) {
+      var d = Math.abs(a - h).toFixed(2);
+      s += '<div class="dnote" style="margin-top:10px">' +
+        (Math.abs(a - h) < 0.3
+          ? '두 팀 불펜이 <b>거의 같습니다</b> (차이 ' + d + ').'
+          : '<b>' + esc(a < h ? g.awayFull : g.homeFull) + '</b> 불펜이 ' + d + ' 낫습니다.') +
+        ' 15이닝 이상 던진 상위 6명 평균입니다.</div>';
+    }
+    return s;
+  }
+
+  /* ---------- 탭 3: 타선 ---------- */
+  function batOne(t, name) {
+    if (!t || !t.bats || !t.bats.length) return '<div class="dnote">기록 없음</div>';
+    var s = '<div class="dteam">' + esc(name) + '</div><table><tbody>';
+    t.bats.forEach(function (b) {
+      s += '<tr><td>' + esc(b.n) + '</td>' +
+           '<td class="dmono" style="text-align:right">' + (b.avg || "—") + '</td>' +
+           '<td class="dmono" style="text-align:right">OPS ' + (b.ops || "—") + '</td>' +
+           '<td style="text-align:right;color:var(--ink-faint)">' + b.hr + '홈런 ' + b.rbi + '타점</td></tr>';
+    });
+    return s + '</tbody></table>';
+  }
+  function splitLine(t, which) {
+    var v = t && t.split && t.split[which];
+    return v ? '경기당 <b>' + v.rpg + '점</b> · 타율 ' + v.avg + ' · OPS ' + v.ops +
+               ' <span style="color:var(--ink-faint)">(' + v.g + '경기)</span>' : "—";
+  }
+  function tabBat(g, at, ht) {
+    return '<div class="dcol2"><div>' + batOne(at, g.awayFull) + '</div>' +
+           '<div>' + batOne(ht, g.homeFull) + '</div></div>' +
+      '<div class="dsub">홈 · 원정 타격</div>' +
+      '<div class="dcol2">' +
+        '<div><div class="dteam">' + esc(g.awayFull) + ' 원정</div>' +
+          '<div class="dnote">' + splitLine(at, "a") + '</div></div>' +
+        '<div><div class="dteam">' + esc(g.homeFull) + ' 홈</div>' +
+          '<div class="dnote">' + splitLine(ht, "h") + '</div></div></div>';
+  }
+
+  /* ---------- 탭 4: 확정 라인업 ---------- */
+  function luOne(lu, team, D, name) {
+    if (!lu || !lu.length) return '<div class="dnote">아직 안 나왔습니다</div>';
+    var all = (team && team.all) || {}, hand = (D && D.hand) || {};
+    var s = '<div class="dteam">' + esc(name) + '</div><table><tbody>';
+    lu.forEach(function (r) {
+      var k = String(r.id), st = all[k] || {}, b = bat(hand[k]);
+      s += '<tr><td class="dmono" style="color:var(--ink-faint);width:1.4em">' + r.i + '</td>' +
+           '<td>' + esc(st.n || r.n) + '</td>' +
+           '<td class="dmono" style="color:var(--ink-faint)">' + esc(r.pos) + '</td>' +
+           '<td class="dmono" style="color:' + (b === "좌" ? "var(--market)" : "var(--ink-faint)") +
+             '">' + b + '</td>' +
+           '<td class="dmono" style="text-align:right">' + (st.avg || "—") + '</td></tr>';
+    });
+    return s + '</tbody></table>';
+  }
+  function lefties(lu, D) {
+    var hand = (D && D.hand) || {}, n = 0;
+    (lu || []).forEach(function (r) { if (bat(hand[String(r.id)]) === "좌") n++; });
+    return n;
+  }
+  function tabLu(g, at, ht, D, aS, hS) {
+    if (!g.luA && !g.luH) {
+      return '<div class="dnote">확정 라인업은 경기 시작 2~3시간 전에 나옵니다. ' +
+             '아직 안 나왔습니다.</div>';
+    }
+    var s = '<div class="dcol2"><div>' + luOne(g.luA, at, D, g.awayFull) + '</div>' +
+            '<div>' + luOne(g.luH, ht, D, g.homeFull) + '</div></div>';
+    // 좌우 매치업 한 줄. 이게 라인업을 보는 진짜 이유입니다.
+    var hand = (D && D.hand) || {};
+    var lines = [];
+    if (g.luA && g.luA.length && g.kspH) {
+      var t = thr(hand[spId(D, g.kspH)]);
+      lines.push('<b>' + esc(g.awayFull) + '</b> 선발 타선 좌타 ' + lefties(g.luA, D) + '명' +
+                 (t ? ' / 상대 선발 ' + esc(g.kspH) + ' ' + t + '투' : ''));
+    }
+    if (g.luH && g.luH.length && g.kspA) {
+      var t2 = thr(hand[spId(D, g.kspA)]);
+      lines.push('<b>' + esc(g.homeFull) + '</b> 선발 타선 좌타 ' + lefties(g.luH, D) + '명' +
+                 (t2 ? ' / 상대 선발 ' + esc(g.kspA) + ' ' + t2 + '투' : ''));
+    }
+    if (lines.length) {
+      s += '<div class="dnote" style="margin-top:10px">' + lines.join('<br>') +
+           '<br><span style="color:var(--ink-faint)">좌타 많은 타선 대 좌투 선발처럼 ' +
+           '한쪽으로 쏠린 매치업이면 참고할 거리가 됩니다. 다만 이것도 배당에 이미 들어가 있습니다.</span></div>';
+    }
+    return s;
+  }
+  function spId(D, name) {
+    var sp = (D && D.sp) || {};
+    for (var k in sp) if (k === name && sp[k].id) return String(sp[k].id);
+    // sp 에 id 가 없으면 hand 를 못 찾습니다. 조용히 빈 값.
+    return "";
+  }
+
+  /* ---------- 조립 ---------- */
+  var SEQ = 0;
+  window.deepPanel = function (g) {
+    var D = window.__DEEP__;
+    if (!D || g.lg !== "MLB") return "";
+    var at = D.teams[g.aKey], ht = D.teams[g.hKey];
+    if (!at && !ht) return "";
+    var aS = D.sp[g.kspA], hS = D.sp[g.kspH];
+    var uid = "dp" + (++SEQ);
+    var tabs = [
+      ["선발",   tabSp(g, aS, hS)],
+      ["불펜",   tabPen(g, at, ht)],
+      ["타선",   tabBat(g, at, ht)],
+      ["라인업", tabLu(g, at, ht, D, aS, hS)]
+    ];
+    var strip = '<div class="dtabs" data-uid="' + uid + '">';
+    var body = "";
+    tabs.forEach(function (t, i) {
+      strip += '<button type="button" class="dtab' + (i === 0 ? " on" : "") +
+               '" data-uid="' + uid + '" data-i="' + i + '">' + t[0] + '</button>';
+      body += '<div class="dpane" data-uid="' + uid + '" data-i="' + i + '"' +
+              (i === 0 ? "" : " hidden") + '>' + t[1] + '</div>';
+    });
+    strip += '</div>';
+    return '<details class="deep"><summary>자세히 보기 — 선발 · 불펜 · 타선 · 라인업</summary>' +
+      '<div class="deep-body">' + strip + '<div class="dsec">' + body + '</div>' +
+      '<div class="dnote" style="padding:0 2px">' +
+      '<b>이 숫자들은 위의 확률에 안 들어갑니다.</b> 모델이 쓰는 건 Elo·팀 최근 성적·' +
+      '선발 최근 실점뿐입니다. 나머지는 "왜 이런 경기인가"를 눈으로 보시라고 붙인 것이고, ' +
+      '이미 배당에도 반영돼 있는 정보입니다. 기준일 ' +
+      '<span class="dmono">' + esc((D.asOf || "").slice(0, 10)) + '</span></div>' +
+      '</div></details>';
+  };
+
+  /* 탭 전환은 위임으로 한 번만 붙입니다(카드가 다시 그려져도 살아남게). */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".dtab");
+    if (!b) return;
+    var uid = b.dataset.uid, i = b.dataset.i;
+    document.querySelectorAll('.dtab[data-uid="' + uid + '"]').forEach(function (x) {
+      x.classList.toggle("on", x.dataset.i === i);
+    });
+    document.querySelectorAll('.dpane[data-uid="' + uid + '"]').forEach(function (x) {
+      x.hidden = x.dataset.i !== i;
+    });
+  });
+
+  /* deepStats 는 gzip+base64 로 실어 페이지를 가볍게 유지합니다. */
+  window.__DEEP__ = null;
+  function boot() {
+    var el = document.getElementById("deepStats");
+    if (!el) return;
+    var raw;
+    try { raw = JSON.parse(el.textContent); } catch (e) { return; }
+    function done(v) {
+      window.__DEEP__ = v;
+      if (typeof window.renderGamesAgain === "function") window.renderGamesAgain();
+    }
+    if (!raw || !raw.gz) { done(raw); return; }
+    (async function () {
+      try {
+        var bin = Uint8Array.from(atob(raw.gz), function (c) { return c.charCodeAt(0); });
+        var st = new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"));
+        done(JSON.parse(await new Response(st).text()));
+      } catch (e) { console.error("심층 자료 해독 실패", e); done(null); }
+    })();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else { boot(); }
+})();
+</script>
+
+<script type="application/json" id="deepStats">{{deepStats}}</script>
+
+<script>
+/* 축구 자료가 언제 갱신됐는지. 2026-09-15~20 에 ESPN 날짜조회가 막혀 6일간 조용히
+   멈춰 있었는데 아무도 몰랐습니다. 그래서 눈에 보이게 박습니다. */
+(function () {
+  "use strict";
+  function run() {
+    var box = document.getElementById("soccerFresh");
+    var raw = document.getElementById("soccerData");
+    if (!box || !raw) return;
+    var d; try { d = JSON.parse(raw.textContent); } catch (e) { return; }
+    var t = Date.parse(d.asOf || "");
+    if (!t) return;
+    var hrs = (Date.now() - t) / 3600000;
+    var when = new Date(t + 9 * 3600000).toISOString().slice(0, 16).replace("T", " ");
+    var src = d.oddsSrc && Object.keys(d.oddsSrc).length
+      ? (Object.keys(d.oddsSrc).map(function (k) { return d.oddsSrc[k]; })
+          .some(function (v) { return v.indexOf("유료") === 0; }) ? "일부 유료 API" : "ESPN 무료")
+      : null;
+    if (hrs > 30) {
+      box.innerHTML = '<div style="background:var(--bad-dim);border:1px solid var(--bad);' +
+        'border-radius:9px;padding:11px 13px;margin-bottom:12px;font-size:.88rem">' +
+        '<b style="color:var(--bad)">축구 자료가 ' + Math.floor(hrs / 24) + '일 ' +
+        Math.floor(hrs % 24) + '시간째 안 바뀌었습니다.</b> 마지막 갱신 ' + when +
+        ' (KST). 수집이 멈춘 것일 수 있습니다 — 저한테 알려주십시오.</div>';
+    } else {
+      box.innerHTML = '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:.72rem;' +
+        'color:var(--ink-faint);margin-bottom:10px">자료 갱신 ' + when + ' (KST)' +
+        (src ? ' · 배당 ' + src : '') + '</div>';
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else { run(); }
+})();
+</script>
+
+<script type="application/json" id="gamesData">{{gamesData}}</script>
+<script type="application/json" id="trackRecord">{{trackRecord}}</script>
+<script>
+/* 성적표는 3,300경기가 넘어 압축해 싣습니다(483KB -> 52KB).
+   예약 갱신 런이 아티팩트를 통째로 읽는 구조라, 커지면 런이 중간에 죽습니다.
+   옛 형식(순수 배열)도 그대로 받습니다. */
+window.__TRACK__ = (async function () {
+  var raw;
+  try { raw = JSON.parse(document.getElementById("trackRecord").textContent); }
+  catch (e) { return []; }
+  if (Array.isArray(raw)) return raw;
+  if (!raw || !raw.gz) return [];
+  try {
+    var bin = Uint8Array.from(atob(raw.gz), function (c) { return c.charCodeAt(0); });
+    var st = new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return JSON.parse(await new Response(st).text());
+  } catch (e) {
+    console.error("성적표 해독 실패", e);
+    return [];
+  }
+})();
+</script>
+
+<script type="application/json" id="soccerData">{{soccerData}}</script>
+<script>
+/* 축구 팀 이름 한글 표기. ESPN 영문 표기 -> 한국에서 흔히 쓰는 이름.
+   표에 없는 팀(승격·신생팀 등)은 영문 그대로 나옵니다. 2026-09-13 추가. */
+window.SOCCER_KO = {"AFC Bournemouth": "본머스", "Arsenal": "아스널", "Aston Villa": "아스톤 빌라", "Brentford": "브렌트포드", "Brighton & Hove Albion": "브라이턴", "Chelsea": "첼시", "Coventry City": "코번트리", "Crystal Palace": "크리스털 팰리스", "Everton": "에버턴", "Fulham": "풀럼", "Hull City": "헐 시티", "Ipswich Town": "입스위치", "Leeds United": "리즈", "Liverpool": "리버풀", "Manchester City": "맨체스터 시티", "Manchester United": "맨체스터 유나이티드", "Newcastle United": "뉴캐슬", "Nottingham Forest": "노팅엄 포레스트", "Sunderland": "선덜랜드", "Tottenham Hotspur": "토트넘", "Alavés": "알라베스", "Athletic Club": "아틀레틱 빌바오", "Atlético Madrid": "AT 마드리드", "Barcelona": "바르셀로나", "Celta Vigo": "셀타 비고", "Deportivo": "데포르티보", "Elche": "엘체", "Espanyol": "에스파뇰", "Getafe": "헤타페", "Levante": "레반테", "Málaga": "말라가", "Osasuna": "오사수나", "Racing Santander": "라싱 산탄데르", "Rayo Vallecano": "라요 바예카노", "Real Betis": "베티스", "Real Madrid": "레알 마드리드", "Real Sociedad": "레알 소시에다드", "Sevilla": "세비야", "Valencia": "발렌시아", "Villarreal": "비야레알", "1. FC Union Berlin": "우니온 베를린", "Bayer Leverkusen": "레버쿠젠", "Bayern Munich": "바이에른 뮌헨", "Borussia Dortmund": "도르트문트", "Borussia Mönchengladbach": "묀헨글라트바흐", "Eintracht Frankfurt": "프랑크푸르트", "FC Augsburg": "아우크스부르크", "FC Cologne": "쾰른", "Hamburg SV": "함부르크", "Mainz": "마인츠", "RB Leipzig": "RB 라이프치히", "SC Freiburg": "프라이부르크", "SC Paderborn 07": "파더보른", "SV Elversberg": "엘버스베르크", "Schalke 04": "샬케 04", "TSG Hoffenheim": "호펜하임", "VfB Stuttgart": "슈투트가르트", "Werder Bremen": "베르더 브레멘", "AC Milan": "AC 밀란", "AS Roma": "AS 로마", "Atalanta": "아탈란타", "Bologna": "볼로냐", "Cagliari": "칼리아리", "Como": "코모", "Fiorentina": "피오렌티나", "Frosinone": "프로시노네", "Genoa": "제노아", "Internazionale": "인테르", "Juventus": "유벤투스", "Lazio": "라치오", "Lecce": "레체", "Monza": "몬차", "Napoli": "나폴리", "Parma": "파르마", "Sassuolo": "사수올로", "Torino": "토리노", "Udinese": "우디네세", "Venezia": "베네치아", "AJ Auxerre": "오세르", "AS Monaco": "모나코", "Angers": "앙제", "Brest": "브레스트", "Le Havre AC": "르아브르", "Le Mans": "르망", "Lens": "랑스", "Lille": "릴", "Lorient": "로리앙", "Lyon": "리옹", "Marseille": "마르세유", "Nice": "니스", "Paris FC": "파리 FC", "Paris Saint-Germain": "PSG", "Stade Rennais": "렌", "Strasbourg": "스트라스부르", "Toulouse": "툴루즈", "Troyes": "트루아", "Coventry": "코번트리", "Cremonese": "크레모네세", "Elversberg": "엘버스베르크", "Hull": "헐 시티", "La Coruna": "데포르티보", "Malaga": "말라가", "Metz": "메스", "Santander": "라싱 산탄데르", "St Pauli": "장크트파울리", "West Ham": "웨스트햄"};
+window.sko = function (n) { return (window.SOCCER_KO && window.SOCCER_KO[n]) || n; };
+</script>
+
+<script type="application/json" id="clvLog">{{clvLog}}</script>
+<script>
+(function () {
+  "use strict";
+  var KEY = "mlb-model-vs-market-20260827";
+
+  var LEAGUES = [
+    {key:"MLB", name:"MLB", note:"한국시간 오전 · 선발 반영 · 검증 9,234경기 정확도 55.4% · BSS 1.84%"},
+    {key:"KBO", name:"KBO", note:"17:00 KST(평일)·12:30(주말) 갱신 · 검증 BSS 경계(약하게 유의)"},
+    {key:"NPB", name:"NPB", note:"18:00 KST · 선발 미반영(홀드아웃에서 도움 안 됨) · 검증 2,380경기 BSS 1.15%"}
+  ];
+
+  var GAMES = JSON.parse(document.getElementById("gamesData").textContent);
+
+  // 형님이 보내주신 livescore 스크린샷에서 읽어 심어둔 배당 (2026-08-28 NPB).
+  // 저장된 값이 없을 때만 채워지므로, 형님이 고친 값은 덮어쓰지 않습니다.
+  var SEED_ODDS = {
+    "LOT@NIP": {oh:"1.43", oa:"2.95"},
+    "RAK@SEI": {oh:"1.71", oa:"2.21"},
+    "SOF@ORI": {oh:"2.23", oa:"1.70"},
+    "CHU@DEN": {oh:"1.74", oa:"2.16"},
+    "YOM@HAN": {oh:"1.66", oa:"2.31"},
+    "YAK@HIR": {oh:"1.84", oa:"2.03"}
+  };
+
+  var state = load();
+  (function seedOnce() {
+    var touched = false;
+    Object.keys(SEED_ODDS).forEach(function (id) {
+      if (!state[id] || (!state[id].oh && !state[id].oa)) {
+        state[id] = { oh: SEED_ODDS[id].oh, oa: SEED_ODDS[id].oa,
+                      winner: (state[id] && state[id].winner) || null };
+        touched = true;
+      }
+    });
+    if (touched) save();
+  })();
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* storage unavailable */ }
+    return {};
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+  function st(id) {
+    if (!state[id]) state[id] = { oh: "", oa: "", winner: null };
+    return state[id];
+  }
+
+  // 배당 자동 채움. 갱신 작업이 ESPN에서 받아온 배당(g.oh/g.oa)을 입력창에 미리 넣습니다.
+  // 형님이 직접 고친 경기는 manual 표시가 붙어 다시 덮어쓰지 않습니다.
+  function autoSeed() {
+    var changed = false;
+    GAMES.forEach(function (g) {
+      if (!g.oh || !g.oa) return;
+      var s = st(g.id);
+      if (s.manual) return;
+      var oh = String(g.oh), oa = String(g.oa);
+      if (s.oh !== oh || s.oa !== oa) { s.oh = oh; s.oa = oa; s.auto = true; changed = true; }
+    });
+    // 총점 기준선도 받아온 게 있으면 채워둡니다 (형님이 고치면 그대로 둡니다)
+    GAMES.forEach(function (g) {
+      if (g.mktTotal == null || !g.pOver) return;
+      var s = st(g.id);
+      if (s.ouManual) return;
+      var v = String(g.mktTotal);
+      if (s.ouLine !== v) { s.ouLine = v; changed = true; }
+    });
+    if (changed) save();
+  }
+
+  // 표준정규 누적분포 (Abramowitz-Stegun 7.1.26) -- 임의 기준선의 오버 확률용
+  function ncdf(z) {
+    var s = z < 0 ? -1 : 1, x = Math.abs(z) / Math.SQRT2;
+    var t = 1 / (1 + 0.3275911 * x);
+    var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t
+      - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return 0.5 * (1 + s * y);
+  }
+
+  // 형님이 넣으신 시장 기준선에서 모델의 오버 확률을 그 자리에서 계산합니다.
+  function renderOU(g) {
+    var el = document.getElementById("ov-" + g.id);
+    if (!el || !g.pOver) return;
+    var L = parseFloat(st(g.id).ouLine);
+    if (!(L > 0)) { el.innerHTML = ""; return; }
+    var sig = g.sig || 4.02;
+    var p = 1 - ncdf((L - g.total) / sig);
+    var side = p >= .5 ? "오버" : "언더";
+    var conf = Math.max(p, 1 - p) * 100;
+    var gap = g.total - L;
+    el.innerHTML =
+      '기준선 <b>' + L.toFixed(1) + '</b> 에서 모델은 <b>' + side + ' ' + conf.toFixed(1) +
+      '%</b> 로 봅니다. 예상 총점 ' + g.total.toFixed(2) + ' 이니 기준선보다 ' +
+      '<b>' + (gap >= 0 ? "+" : "") + gap.toFixed(2) + '점</b> ' +
+      (gap >= 0 ? "높게" : "낮게") + ' 봅니다.' +
+      (conf < 53
+        ? ' <span style="color:var(--ink-faint)">차이가 작아 사실상 반반입니다.</span>'
+        : '');
+  }
+
+  function marketProb(oh, oa) {
+    var h = parseFloat(oh), a = parseFloat(oa);
+    if (!(h > 1) || !(a > 1)) return null;
+    var ih = 1 / h, ia = 1 / a;
+    return ih / (ih + ia);
+  }
+
+  // 등급 = "얼마나 믿을 만한가". 값어치(밸류)가 아닙니다.
+  // 근거: 축구 O/U 15,536경기에서 모델·시장이 엇갈릴수록 모델이 틀렸습니다.
+  // 그래서 시장이 동의할수록 등급이 높고, 반대할수록 낮습니다.
+  function tier(g, mp) {
+    var conf = Math.max(g.pHome, 1 - g.pHome);
+    if (mp === null) {
+      if (conf < 0.53) return {c:"none", t:"배당 입력 전 · 모델 확신 낮음",
+        m:"모델이 사실상 반반으로 봅니다. 배당을 넣어 시장과 대조해 보세요."};
+      return {c:"none", t:"배당 입력 전",
+        m:"배당을 넣으면 시장과 대조해서 등급이 매겨집니다."};
+    }
+    var samePick = (g.pHome >= 0.5) === (mp >= 0.5);
+    var d = Math.abs(g.pHome - mp);
+
+    if (!samePick) return {c:"d", t:"D · 시장과 반대",
+      m:"모델이 시장과 반대쪽을 골랐습니다. 과거 데이터에서 이럴 때 이긴 건 시장이었습니다 — 엇갈림이 클수록 모델이 더 많이 틀렸습니다(20%p 이상 구간에서 모델 44.1%, 시장 70.6%). 가장 믿기 어려운 경우입니다."};
+    if (d < 0.05) return {c:"a", t:"A · 모델·시장 일치",
+      m:"모델과 시장이 같은 쪽을, 비슷한 확신으로 봅니다. 서로 다른 근거로 같은 결론에 도달한 경우라 오늘 픽 중 가장 믿을 만합니다."};
+    if (d < 0.10) return {c:"b", t:"B · 방향 일치",
+      m:"같은 쪽을 골랐지만 확신 정도가 5~10%p 다릅니다. 방향은 믿을 만하고, 확률 크기는 시장 쪽이 더 정확했던 편입니다."};
+    return {c:"c", t:"C · 방향만 일치",
+      m:"같은 쪽이지만 확신 차이가 10%p 이상입니다. 모델이 시장이 모르는 걸 안다기보다, 모델이 뭔가 놓쳤을 가능성이 큽니다."};
+  }
+
+  // 모델이 고른 쪽을 기준으로, 모델과 시장이 몇 %p 벌어졌고 어느 쪽이 더 확신하는가.
+  function gapInfo(g, mp) {
+    if (mp === null) return null;
+    var pickHome = g.pHome >= 0.5;
+    var modelP = pickHome ? g.pHome : 1 - g.pHome;
+    var same = pickHome === (mp >= 0.5);
+    var mktSame = pickHome ? mp : 1 - mp;
+    var d = (modelP - mktSame) * 100;
+    return { same: same, d: d, abs: Math.abs(d) };
+  }
+
+  function gapNote(g, mp, inline) {
+    var gi = gapInfo(g, mp);
+    if (!gi) return "";
+    var cls, txt;
+    if (!gi.same) { cls = "op"; txt = "반대쪽"; }
+    else if (gi.abs < 1) { cls = "eq"; txt = "차이 없음"; }
+    else if (gi.d > 0) { cls = "up"; txt = "모델 +" + gi.d.toFixed(1) + "%p"; }
+    else { cls = "dn"; txt = "시장 +" + gi.abs.toFixed(1) + "%p"; }
+    return '<span class="gapnote ' + cls + '"' +
+      (inline ? ' style="display:inline;margin:0 0 0 6px"' : '') + '>' + txt + '</span>';
+  }
+
+  function band(diff) {
+    var d = Math.abs(diff);
+    if (d < 0.05) return {cls:"agree", t:"거의 일치",
+      m:"모델과 시장이 사실상 같은 판단입니다. 과거 데이터에서 이 구간은 양쪽 적중률이 같았습니다(57.2% 대 57.1%)."};
+    if (d < 0.10) return {cls:"mild", t:"약간 엇갈림 (5~10%p)",
+      m:"과거 이 구간에서는 시장이 더 맞았습니다 — 모델 56.3% 대 시장 60.3%."};
+    if (d < 0.20) return {cls:"warn", t:"뚜렷하게 엇갈림 (10~20%p)",
+      m:"과거 이 구간에서는 시장이 확실히 더 맞았습니다 — 모델 55.1% 대 시장 63.3%. 모델 쪽을 믿을 근거가 약합니다."};
+    return {cls:"danger", t:"크게 엇갈림 (20%p 이상)",
+      m:"가장 위험한 구간입니다. 과거 이 구간에서 모델은 44.1%로 동전 던지기보다도 못했고 시장은 70.6%였습니다."};
+  }
+
+  function render() {
+    var wrap = document.getElementById("games");
+    wrap.innerHTML = "";
+    window.renderGamesAgain = render;   // 심층 자료가 늦게 풀리면 다시 그립니다
+
+    LEAGUES.forEach(function (L) {
+      var mine = GAMES.filter(function (g) { return g.lg === L.key; });
+      if (!mine.length) return;
+      // 이미 시작한(=사실상 끝난) 경기는 뒤로. 각 그룹 안에서는 시작 시각 오름차순.
+      mine = mine.slice().sort(function (a, b) {
+        var d = (isPastStart(a) ? 1 : 0) - (isPastStart(b) ? 1 : 0);
+        if (d !== 0) return d;
+        return statusMinutes(a.status) - statusMinutes(b.status);
+      });
+      var head = document.createElement("div");
+      head.className = "lg-head";
+      head.innerHTML = '<span class="lg-name">' + L.name + '</span>' +
+        '<span class="lg-note">' + L.note + '</span>';
+      wrap.appendChild(head);
+
+      mine.forEach(function (g) {
+      var s = st(g.id);
+      var mp = marketProb(s.oh, s.oa);
+      var modelPick = g.pHome >= 0.5 ? g.home : g.away;
+      var marketPick = mp === null ? null : (mp >= 0.5 ? g.home : g.away);
+      var past = isPastStart(g);
+
+      var el = document.createElement("div");
+      el.className = "game" + (s.winner ? " settled" : "") + (g.cancelled ? " cancelled" : "") +
+        (past && !s.winner ? " started" : "");
+      if (g.cancelled) {
+        el.innerHTML =
+          '<div class="g-top"><div>' +
+            '<div class="matchup">' + g.awayFull + '<span class="at">@</span>' + g.homeFull + '</div>' +
+            '<div class="sp">' + (g.venue ? g.venue + ' · ' : '') +
+              '모델은 ' + (g.pHome >= 0.5 ? g.homeFull : g.awayFull) + ' ' +
+              (Math.max(g.pHome, 1 - g.pHome) * 100).toFixed(1) + '%로 봤습니다</div>' +
+          '</div><span class="status cancel">' + g.cancelled + '</span></div>';
+        wrap.appendChild(el);
+        return;
+      }
+
+      var detail;
+      if (g.asp) {
+        detail = '선발 <b>' + g.asp + '</b> (최근 실점 ' + g.aRa.toFixed(2) + ')' +
+          ' vs <b>' + g.hsp + '</b> (' + g.hRa.toFixed(2) + ') · Elo차 ' +
+          (g.elo >= 0 ? "+" : "") + g.elo.toFixed(1);
+      } else if (g.spUsed) {
+        // 등판 수가 적은 투수는 최근 실점 추정이 사실상 근거가 없습니다
+        var thin = function (n) {
+          return n < 12
+            ? ' <span style="color:var(--bad);font-weight:600">근거 얇음 ' + n + '등판</span>'
+            : ' <span style="color:var(--ink-faint)">' + n + '등판</span>';
+        };
+        var raA = g.aRa === null ? "기록 없음" : "최근 실점 " + g.aRa.toFixed(2);
+        detail = (g.venue ? g.venue + ' · ' : '') + 'Elo차 ' +
+          (g.elo >= 0 ? "+" : "") + g.elo.toFixed(1) +
+          '<br>선발 <b>' + g.kspA + '</b> (' + raA + ')' + thin(g.aN) +
+          ' vs <b>' + g.kspH + '</b> (최근 실점 ' + g.hRa.toFixed(2) + ')' + thin(g.hN);
+      } else if (g.kspA) {
+        detail = (g.venue ? g.venue + ' · ' : '') + 'Elo차 ' +
+          (g.elo >= 0 ? "+" : "") + g.elo.toFixed(1) +
+          '<br>선발 <b>' + g.kspA + '</b> vs <b>' + g.kspH + '</b> ' +
+          '<span style="color:var(--ink-faint)">(표시만 — 홀드아웃에서 도움이 안 돼 확률에는 안 씁니다)</span>';
+      } else {
+        detail = (g.venue ? g.venue + ' · ' : '') + 'Elo차 ' +
+          (g.elo >= 0 ? "+" : "") + g.elo.toFixed(1) +
+          ' <span style="color:var(--ink-faint)">(선발 미등록 · 팀 지표만 사용)</span>';
+      }
+
+      var html =
+        '<div class="g-top">' +
+          '<div>' +
+            '<div class="matchup">' + g.awayFull + '<span class="at">@</span>' + g.homeFull + '</div>' +
+            '<div class="sp">' + detail + '</div>' +
+          '</div>' +
+          '<span class="status">' + g.status + startedTagText(g, past) + '</span>' +
+        '</div>' +
+
+        '<div class="pickwrap">' +
+          '<span class="picklabel">모델 픽</span>' +
+          '<span class="pickteam">' + (g.pHome >= 0.5 ? g.homeFull : g.awayFull) + '</span>' +
+          '<span class="pickpct">' + (Math.max(g.pHome, 1 - g.pHome) * 100).toFixed(1) + '%</span>' +
+          '<span class="tier none" id="tr-' + g.id + '">배당 입력 전</span>' +
+        '</div>' +
+
+        '<div class="probs">' +
+          '<span class="p-lab model">모델</span>' +
+          '<div class="p-track"><div class="p-fill model" style="width:' + (g.pHome*100).toFixed(1) + '%"></div><div class="p-mid"></div></div>' +
+          '<span class="p-val">' + (g.pHome*100).toFixed(1) + '%</span>' +
+        '</div>' +
+
+        '<div class="probs">' +
+          '<span class="p-lab market">시장</span>' +
+          '<div class="p-track"><div class="p-fill market" id="mf-' + g.id + '" style="width:' +
+            (mp === null ? "0" : (mp*100).toFixed(1)) + '%"></div><div class="p-mid"></div></div>' +
+          (mp === null
+            ? '<span class="p-empty" id="mv-' + g.id + '">—</span>'
+            : '<span class="p-val" id="mv-' + g.id + '">' + (mp*100).toFixed(1) + '%</span>') +
+        '</div>' +
+
+        '<div style="font-size:.78rem;color:var(--ink-faint);margin-top:2px;">막대는 ' +
+          g.homeFull + ' 승리 확률입니다 (가운데 선 = 50%)</div>' +
+
+        (g.pOver ? (function () {
+          var po = g.pOver["7.5"], side = po >= .5 ? "오버" : "언더";
+          return '<div class="ourow">' +
+            '<span class="ou-lab">예상 총점</span>' +
+            '<span class="ou-tot">' + g.total.toFixed(2) + '</span>' +
+            '<span class="ou-pick ' + (po >= .5 ? "over" : "under") + '">7.5 ' + side +
+              ' ' + (Math.max(po, 1 - po) * 100).toFixed(0) + '%</span>' +
+            '<span class="ou-alt">6.5 오버 ' + (g.pOver["6.5"] * 100).toFixed(0) +
+              '% · 8.5 오버 ' + (g.pOver["8.5"] * 100).toFixed(0) +
+              '% · 9.5 오버 ' + (g.pOver["9.5"] * 100).toFixed(0) + '%</span>' +
+            (g.totalSp ? '' : '<span class="ou-thin">선발 미발표 — 팀 평균으로 대체</span>') +
+            '<span class="ou-in"><label>' +
+              (g.mktTotal != null && !s.ouManual ? (g.book || '북메이커') + ' 기준선' : '시장 기준선') +
+              '</label>' +
+              '<input type="text" inputmode="decimal" autocomplete="off" data-ou="' + g.id +
+              '" value="' + (s.ouLine || "") + '" placeholder="7.5"></span>' +
+            '<div class="ou-verdict" id="ov-' + g.id + '"></div>' +
+          '</div>';
+        })() :
+        (g.total != null && g.lg === "MLB"
+          ? '<div class="ou-mkt">시장 총점 기준선 <b style="font-family:\'IBM Plex Mono\',monospace">' +
+            g.total.toFixed(1) + '</b>' +
+            (g.over ? ' · 오버 ' + g.over + ' / 언더 ' + g.under : '') +
+            ' — 모델 예측 없음 (MLB 총점은 홀드아웃에서 리그 평균을 못 이겼습니다)</div>'
+          : '')) +
+
+        '<div class="oddsrow">' +
+          '<label>' + g.homeFull + ' 배당</label>' +
+          '<input type="text" inputmode="decimal" autocomplete="off" data-o="h" data-id="' + g.id + '" value="' + (s.oh || "") + '" placeholder="1.85">' +
+          '<label>' + g.awayFull + ' 배당</label>' +
+          '<input type="text" inputmode="decimal" autocomplete="off" data-o="a" data-id="' + g.id + '" value="' + (s.oa || "") + '" placeholder="2.05">' +
+          '<span style="font-size:.76rem;color:var(--ink-faint)">' +
+            (s.auto ? (g.book || "북메이커") + ' 배당 자동 입력 · 고치면 그대로 유지됩니다'
+                    : (g.oh ? '직접 입력함 (자동값 ' + g.oa + ' / ' + g.oh + ')'
+                            : 'livescore.in 등에서 보고 직접 입력')) +
+          '</span>' +
+        '</div>' +
+
+        '<div class="verdictline" id="vl-' + g.id + '"></div>';
+
+      if (typeof window.deepPanel === "function") html += window.deepPanel(g);
+
+      html += '<div class="settle"><span class="q">실제 승리 팀</span>' +
+        '<button data-w="' + g.away + '" data-id="' + g.id + '" class="' + (s.winner === g.away ? "on-good" : "") + '">' + g.awayFull + '</button>' +
+        '<button data-w="' + g.home + '" data-id="' + g.id + '" class="' + (s.winner === g.home ? "on-good" : "") + '">' + g.homeFull + '</button>';
+
+      if (s.winner) {
+        var mHit = modelPick === s.winner;
+        html += '<span class="result ' + (mHit ? "hit" : "miss") + '">모델 ' + (mHit ? "적중 ✓" : "실패 ✗") + '</span>';
+        if (marketPick) {
+          var kHit = marketPick === s.winner;
+          html += '<span class="result ' + (kHit ? "hit" : "miss") + '">시장 ' + (kHit ? "적중 ✓" : "실패 ✗") + '</span>';
+        }
+        html += '<button class="ghost" data-clear="' + g.id + '">되돌리기</button>';
+      }
+      html += '</div>';
+
+      el.innerHTML = html;
+      wrap.appendChild(el);
+      });
+    });
+
+    wire();
+    GAMES.forEach(function (g) { if (g.pOver) renderOU(g); });
+    GAMES.forEach(updateCard);
+    renderSummary();
+    scoreboard();
+  }
+
+  // 배당 입력 중에는 화면 전체를 다시 그리지 않고 해당 카드만 갱신합니다.
+  // (전체 렌더링은 입력창을 새로 만들어서 커서를 맨 앞으로 되돌리고,
+  //  그 결과 "1.60"이 "06.1"처럼 거꾸로 입력되는 문제가 있었습니다.)
+  function updateCard(g) {
+    if (g.cancelled) return;
+    var s = st(g.id);
+    var mp = marketProb(s.oh, s.oa);
+    var fill = document.getElementById("mf-" + g.id);
+    var val = document.getElementById("mv-" + g.id);
+    var vl = document.getElementById("vl-" + g.id);
+    var tr = document.getElementById("tr-" + g.id);
+    if (!fill || !val || !vl || !tr) return;
+
+    var T = tier(g, mp);
+    tr.className = "tier " + T.c;
+    tr.innerHTML = T.t + gapNote(g, mp, true);
+
+    if (mp === null) {
+      fill.style.width = "0%";
+      val.textContent = "—";
+      val.className = "p-empty";
+      vl.className = "verdictline on mild";
+      vl.innerHTML = '<span class="vt">' + T.t + '</span>' + T.m;
+      return;
+    }
+    fill.style.width = (mp * 100).toFixed(1) + "%";
+    val.textContent = (mp * 100).toFixed(1) + "%";
+    val.className = "p-val";
+
+    var modelPick = g.pHome >= 0.5 ? g.homeFull : g.awayFull;
+    var marketPick = mp >= 0.5 ? g.homeFull : g.awayFull;
+    var cls = { a: "agree", b: "mild", c: "warn", d: "danger" }[T.c] || "mild";
+    vl.className = "verdictline on " + cls;
+    vl.innerHTML = '<span class="vt">' + T.t + ' · 모델 ' + modelPick +
+      ' / 시장 ' + marketPick + '</span>' + T.m;
+  }
+
+  var TIER_ORDER = { a: 0, b: 1, c: 2, d: 3, none: 4 };
+
+  // 요약표의 언더오버 칸.
+  // - NPB: 모델 총점(g.total)이 있어서 시장 기준선(g.mktTotal)과 대조한 "모델의 콜"을 보여줍니다.
+  // - MLB·KBO: 모델 총점은 없지만(홀드아웃 미검증), 시장 기준선 자체는 있으면 그것만이라도 보여줍니다.
+  //   MLB는 기준선이 g.total(=DraftKings 라인, 모델값이 아님)에, KBO·NPB는 g.mktTotal에 실립니다.
+  function ouCell(g) {
+    if (g.pOver) {
+      var L = g.mktTotal;
+      if (L == null) return '<span class="tier none">기준선 없음</span>';
+      var sig = g.sig || 4.02;
+      var p = 1 - ncdf((L - g.total) / sig);
+      var side = p >= .5 ? "오버" : "언더";
+      var conf = Math.max(p, 1 - p) * 100;
+      return L.toFixed(1) + ' <b>' + side + '</b> ' + conf.toFixed(0) + '%' +
+        (g.totalSp ? '' : ' <span class="startedTag">선발 미발표</span>');
+    }
+    var line = g.mktTotal != null ? g.mktTotal : g.total;
+    if (line == null) return '<span class="tier none">기준선 없음</span>';
+    var mp2 = marketProb(g.over, g.under);
+    if (mp2 == null) {
+      return line.toFixed(1) + ' <span class="startedTag">시장 기준선 · 모델 없음</span>';
+    }
+    var side2 = mp2 >= .5 ? "오버" : "언더";
+    var conf2 = Math.max(mp2, 1 - mp2) * 100;
+    return line.toFixed(1) + ' ' + side2 + ' ' + conf2.toFixed(0) + '% <span class="startedTag">시장</span>';
+  }
+
+  // MLB·KBO·NPB 는 경기별 날짜 필드가 없고 "오늘(KST)" 하루치만 다룹니다.
+  // 헤더의 dateChip("YYYY-MM-DD (KST) · ...")에서 그 날짜를 그대로 가져와 씁니다.
+  // "HH:MM" 형태의 status 를 자정 기준 분(分)으로 바꿔 시각순 정렬에 씁니다.
+  // 형식이 아니면(취소·진행중 표기 등) 맨 뒤로 보냅니다.
+  function statusMinutes(status) {
+    if (typeof status !== "string") return 1e9;
+    var m = status.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return 1e9;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+  function todayDateMD() {
+    try {
+      var t = document.getElementById("dateChip").textContent;
+      var m = t.match(/(\d{4})-(\d{2})-(\d{2})/);
+      return m ? m[2] + "/" + m[3] : "";
+    } catch (e) { return ""; }
+  }
+
+  // gamesData 의 started 값은 그 갱신 작업이 마지막으로 돌았던 시점의 스냅샷입니다.
+  // 예약작업 사이(특히 라인업 전용 실행은 --no-settle) 시간이 흐르면 실제로는
+  // 이미 시작한 경기도 started:false 로 남아있을 수 있어서, 화면에 뜬 시각과
+  // "지금(KST)"을 직접 비교해 보정합니다 — 스코어를 아는 건 아니고 "시작 시각이
+  // 지났다"만 압니다.
+  function kstNowMinutes() {
+    var n = new Date();
+    var utcMs = n.getTime() + n.getTimezoneOffset() * 60000;
+    var k = new Date(utcMs + 9 * 3600000);
+    return k.getHours() * 60 + k.getMinutes();
+  }
+  function kstTodayISO() {
+    var n = new Date();
+    var utcMs = n.getTime() + n.getTimezoneOffset() * 60000;
+    var k = new Date(utcMs + 9 * 3600000);
+    return k.getFullYear() + "-" + String(k.getMonth() + 1).padStart(2, "0") +
+      "-" + String(k.getDate()).padStart(2, "0");
+  }
+  function isPastStart(g) {
+    // date 필드가 있는데 오늘(KST)이 아니면 — 아직 갱신 안 된 어제 잔여물이 화면에
+    // 남아있는 경우입니다. 무조건 지난 경기로 취급합니다(시각 비교보다 우선).
+    if (g.date && g.date !== kstTodayISO()) return true;
+    if (g.started) return true;
+    var mins = statusMinutes(g.status);
+    return mins < 1e9 && mins <= kstNowMinutes();
+  }
+  function isPastKickoff(g) {
+    if (g.started) return true;
+    if (!g.date) return false;
+    var t = new Date(g.date).getTime();
+    return !isNaN(t) && t <= Date.now();
+  }
+  // 확정(g.started=true, 갱신 작업이 실제로 확인함) vs 추정(시각만 지남, 아직 확인 전) 구분해서 표시.
+  function startedTagText(g, past) {
+    if (g.started) return " · 시작함";
+    if (past) return " · 시작 시각 지남(추정)";
+    return "";
+  }
+
+  function renderSummary() {
+    var rows = GAMES.filter(function (g) { return !g.cancelled; }).map(function (g) {
+      var s = st(g.id);
+      var mp = marketProb(s.oh, s.oa);
+      return { g: g, mp: mp, T: tier(g, mp) };
+    });
+    rows.sort(function (x, y) {
+      // 이미 시작한(=사실상 끝난) 경기는 맨 아래로. 각 그룹 안에서는 시작 시각 오름차순.
+      var xs = isPastStart(x.g) ? 1 : 0, ys = isPastStart(y.g) ? 1 : 0;
+      if (xs !== ys) return xs - ys;
+      return statusMinutes(x.g.status) - statusMinutes(y.g.status);
+    });
+    // 표 대신 한 줄로 말해줍니다. 숫자는 작게 뒤에 붙습니다.
+    document.getElementById("pickList").innerHTML = rows.map(function (r) {
+      var g = r.g;
+      var past = isPastStart(g);
+      var pick = g.pHome >= 0.5 ? g.homeFull : g.awayFull;
+      var conf = Math.max(g.pHome, 1 - g.pHome) * 100;
+      var gi = gapInfo(g, r.mp);
+      var say, num;
+
+      if (r.mp === null) {
+        say = '<b>' + pick + '</b> — 배당이 아직 없어 시장과 대조를 못 했습니다';
+        num = '모델 ' + conf.toFixed(1) + '%';
+      } else {
+        var mktPick = r.mp >= 0.5 ? g.homeFull : g.awayFull;
+        num = '모델 ' + conf.toFixed(1) + '% · 시장 ' +
+              ((r.mp >= 0.5 ? r.mp : 1 - r.mp) * 100).toFixed(1) + '% ' + mktPick +
+              ' · 차이 ' + gi.abs.toFixed(1) + '%p';
+        if (!gi.same) {
+          say = '<b>' + pick + '</b> — 시장은 <span class="badw">' + mktPick +
+                '</span>. 서로 반대입니다. 과거엔 이런 자리에서 시장이 이겼습니다';
+        } else if (gi.abs < 5) {
+          say = '<b>' + pick + '</b> — 모델도 시장도 같은 편. 특별할 거 없습니다';
+        } else if (gi.d > 0) {
+          say = '<b>' + pick + '</b> — <span class="warnw">모델이 시장보다 ' +
+                gi.d.toFixed(1) + '%p 높게</span> 봅니다. 과거엔 이런 자리에서 시장이 ' +
+                (gi.abs < 10 ? '4%p' : '8%p') + ' 더 맞았습니다';
+        } else {
+          say = '<b>' + pick + '</b> — 시장이 ' + gi.abs.toFixed(1) +
+                '%p 더 확신합니다. 모델이 조심스러운 쪽입니다';
+        }
+      }
+
+      var ou = ouCell(g);
+      var ouLine = (ou && ou !== "—") ? '<div class="pk-ou">언더오버 ' + ou + '</div>' : '';
+      var tag = past ? ' <span class="startedTag">' +
+        (g.started ? '시작함' : '시작 시각 지남(추정)') + '</span>' : '';
+
+      return '<div class="pk-row ' + r.T.c + (past ? ' past' : '') + '">' +
+        '<span class="pk-dot"></span><div class="pk-body">' +
+          '<div class="pk-top"><span class="pk-time">' + (g.status || '—') + '</span>' +
+            '<span class="pk-lg">' + g.lg + '</span>' +
+            '<span class="pk-match">' + g.awayFull + ' @ ' + g.homeFull + '</span>' + tag +
+          '</div>' +
+          '<div class="pk-say">' + say + '</div>' +
+          '<div class="pk-num">' + num + '</div>' + ouLine +
+        '</div></div>';
+    }).join("") || '<p class="hint" style="padding:10px 0">오늘 잡힌 경기가 없습니다.</p>';
+  }
+
+  function wire() {
+    document.querySelectorAll("[data-o]").forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        // 숫자와 소수점만 허용 (커서는 건드리지 않습니다)
+        var cleaned = inp.value.replace(/[^0-9.]/g, "");
+        if (cleaned !== inp.value) {
+          var at = inp.selectionStart;
+          inp.value = cleaned;
+          try { inp.setSelectionRange(at - 1, at - 1); } catch (e) {}
+        }
+        var s = st(inp.dataset.id);
+        s[inp.dataset.o === "h" ? "oh" : "oa"] = inp.value;
+        s.manual = true; s.auto = false;
+        save();
+        updateCard(GAMES.filter(function (x) { return x.id === inp.dataset.id; })[0]);
+        renderSummary();
+        scoreboard();
+      });
+    });
+    document.querySelectorAll("[data-ou]").forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var cleaned = inp.value.replace(/[^0-9.]/g, "");
+        if (cleaned !== inp.value) {
+          var at = inp.selectionStart;
+          inp.value = cleaned;
+          try { inp.setSelectionRange(at - 1, at - 1); } catch (e) {}
+        }
+        var so = st(inp.dataset.ou);
+        so.ouLine = inp.value; so.ouManual = true;
+        save();
+        renderOU(GAMES.filter(function (x) { return x.id === inp.dataset.ou; })[0]);
+      });
+    });
+    document.querySelectorAll("[data-w]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var s = st(b.dataset.id);
+        s.winner = (s.winner === b.dataset.w) ? null : b.dataset.w;
+        save(); render();
+      });
+    });
+    document.querySelectorAll("[data-clear]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        st(b.dataset.clear).winner = null; save(); render();
+      });
+    });
+  }
+
+  function scoreboard() {
+    var n = 0, mHit = 0, kN = 0, kHit = 0, dis = 0, disMhit = 0;
+    GAMES.forEach(function (g) {
+      if (g.cancelled) return;
+      var s = st(g.id);
+      if (!s.winner) return;
+      n++;
+      var modelPick = g.pHome >= 0.5 ? g.home : g.away;
+      if (modelPick === s.winner) mHit++;
+      var mp = marketProb(s.oh, s.oa);
+      if (mp !== null) {
+        kN++;
+        if ((mp >= 0.5 ? g.home : g.away) === s.winner) kHit++;
+        if (Math.abs(g.pHome - mp) >= 0.05) {
+          dis++;
+          if (modelPick === s.winner) disMhit++;
+        }
+      }
+    });
+    document.getElementById("stN").textContent = n;
+    document.getElementById("stModel").textContent = n ? (mHit / n * 100).toFixed(0) + "%" : "—";
+    document.getElementById("stModelD").textContent = n ? mHit + " / " + n + " 적중" : "결과 입력 시 집계";
+    document.getElementById("stMarket").textContent = kN ? (kHit / kN * 100).toFixed(0) + "%" : "—";
+    document.getElementById("stMarketD").textContent = kN ? kHit + " / " + kN + " 적중" : "배당 입력 시 집계";
+    document.getElementById("stDis").textContent = dis;
+    document.getElementById("stDisD").textContent = dis
+      ? "그중 모델 적중 " + disMhit + "회" : "5%p 이상 차이";
+  }
+
+  var armed = false;
+  document.getElementById("btnReset").addEventListener("click", function () {
+    var hint = document.getElementById("resetHint");
+    if (!armed) {
+      armed = true; hint.style.display = "inline";
+      setTimeout(function () { armed = false; hint.style.display = "none"; }, 4000);
+      return;
+    }
+    armed = false; hint.style.display = "none";
+    state = {}; save(); autoSeed(); render();
+  });
+
+
+  // ---------- 내 픽 성적표 (예약 작업이 매일 결과를 채워 넣습니다) ----------
+  var REC = [];   // 압축 해제 후 채워집니다 (아래 __TRACK__ 참조)
+
+  function wilson(h, n) {
+    if (!n) return [0, 0, 0];
+    var z = 1.96, p = h / n, d = 1 + z * z / n, c = p + z * z / (2 * n);
+    var m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n));
+    return [p * 100, (c - m) / d * 100, (c + m) / d * 100];
+  }
+
+  function renderRecord() {
+    var sec = document.getElementById("recordSection");
+    var n = REC.length, hits = REC.reduce(function (a, r) { return a + (r.hit ? 1 : 0); }, 0);
+    document.getElementById("recSub").textContent = n
+      ? n + "경기 정산 · " + REC[0].date + " ~ " + REC[n - 1].date + " · 매일 자동 갱신"
+      : "아직 정산된 경기가 없습니다 — 내일 16:30부터 자동으로 쌓입니다";
+    if (!n) { document.getElementById("recCards").innerHTML = ""; return; }
+
+    var w = wilson(hits, n);
+    // 기대 적중률: 모델이 스스로 말한 확신의 평균
+    var exp = REC.reduce(function (a, r) {
+      return a + Math.max(r.pHome, 1 - r.pHome); }, 0) / n * 100;
+    // 야구는 홈팀이 그냥 잘 이깁니다. 50%가 아니라 "무조건 홈만 찍었을 때"가 진짜 기준선입니다.
+    var homeBase = REC.filter(function (r) {
+      return (r.pHome >= .5) === (r.hit === 1); }).length / n * 100;
+    var edge = w[0] - homeBase;
+
+    document.getElementById("recCards").innerHTML =
+      card("누적 적중률", w[0].toFixed(1) + "%", hits + " / " + n + "경기") +
+      card("무조건 홈만 찍었으면", homeBase.toFixed(1) + "%", "같은 경기 기준") +
+      card("모델이 보탠 값", (edge >= 0 ? "+" : "") + edge.toFixed(2) + "%p",
+           w[1] > homeBase ? "기준선을 넘었습니다" : "아직 기준선 못 넘음") +
+      card("95% 신뢰구간", w[1].toFixed(1) + "–" + w[2].toFixed(1),
+           "기준선 " + homeBase.toFixed(1) + "% 와 비교") +
+      card("보정 오차", (w[0] - exp >= 0 ? "+" : "") + (w[0] - exp).toFixed(1) + "%p",
+           "모델은 " + exp.toFixed(1) + "% 라고 했음");
+
+    // 언더/오버 (NPB 기준선 7.5) -- 승패와 따로 셉니다
+    var ou = REC.filter(function (r) { return r.ouPick; });
+    var ouBox = document.getElementById("recOU");
+    if (!ou.length) {
+      ouBox.innerHTML = '<p class="rec-lab" style="text-transform:none;letter-spacing:0;' +
+        'font-size:.8rem;margin:14px 0 0;">언더/오버는 NPB만 예측합니다. ' +
+        'MLB·KBO는 홀드아웃에서 리그 평균을 못 이겨서 숫자를 만들지 않습니다. ' +
+        '첫 정산이 쌓이면 여기에 성적이 나옵니다.</p>';
+    } else {
+      var oh = ou.reduce(function (a, r) { return a + (r.ouHit ? 1 : 0); }, 0);
+      var q = wilson(oh, ou.length);
+      var oexp = ou.reduce(function (a, r) {
+        return a + Math.max(r.ouP, 1 - r.ouP); }, 0) / ou.length * 100;
+      var mae = ou.filter(function (r) { return r.totalPred != null; });
+      var maeV = mae.length ? mae.reduce(function (a, r) {
+        return a + Math.abs(r.totalPred - r.total); }, 0) / mae.length : null;
+      // 7.5 기준선에서는 언더가 그냥 더 많이 나옵니다. 50%가 아니라 그게 기준선입니다.
+      var underRate = ou.filter(function (r) {
+        return (r.ouPick === "언더") === (r.ouHit === 1); }).length / ou.length * 100;
+      var ouBase = Math.max(underRate, 100 - underRate);
+      var ouBaseName = underRate >= 50 ? "무조건 언더만 찍었으면" : "무조건 오버만 찍었으면";
+      var ouEdge = q[0] - ouBase;
+      ouBox.innerHTML =
+        '<div class="rec-lab" style="margin-top:16px">언더/오버 · NPB 7.5 기준</div>' +
+        '<div class="rec-cards">' +
+          card("오버언더 적중률", q[0].toFixed(1) + "%", oh + " / " + ou.length + "경기") +
+          card(ouBaseName, ouBase.toFixed(1) + "%", "같은 경기 기준") +
+          card("모델이 보탠 값", (ouEdge >= 0 ? "+" : "") + ouEdge.toFixed(2) + "%p",
+               q[1] > ouBase ? "기준선을 넘었습니다" : "아직 기준선 못 넘음") +
+          card("95% 신뢰구간", q[1].toFixed(1) + "–" + q[2].toFixed(1),
+               "기준선 " + ouBase.toFixed(1) + "% 와 비교") +
+          (maeV === null ? "" :
+            card("예상 총점 오차", maeV.toFixed(2) + "점", "실제 총점과의 평균 차이")) +
+        '</div>';
+    }
+
+    // 리그별
+    var byLg = {};
+    REC.forEach(function (r) {
+      byLg[r.lg] = byLg[r.lg] || { n: 0, h: 0 };
+      byLg[r.lg].n++; byLg[r.lg].h += r.hit ? 1 : 0;
+    });
+    document.getElementById("recByLg").innerHTML = Object.keys(byLg).sort().map(function (k) {
+      var v = byLg[k], q = wilson(v.h, v.n);
+      return "<tr><td>" + k + "</td><td>" + v.n + "</td><td>" + v.h + "</td><td>" +
+        q[0].toFixed(1) + "%</td><td>" + q[1].toFixed(0) + "–" + q[2].toFixed(0) + "</td></tr>";
+    }).join("");
+
+    // 확신도 구간별 -- 캘리브레이션
+    var bands = [[.5, .55, "50–55%"], [.55, .60, "55–60%"], [.60, .65, "60–65%"], [.65, 1.01, "65%+"]];
+    document.getElementById("recByConf").innerHTML = bands.map(function (b) {
+      var sel = REC.filter(function (r) {
+        var c = Math.max(r.pHome, 1 - r.pHome);
+        return c >= b[0] && c < b[1];
+      });
+      if (!sel.length) return "";
+      var h = sel.filter(function (r) { return r.hit; }).length;
+      var ex = sel.reduce(function (a, r) {
+        return a + Math.max(r.pHome, 1 - r.pHome); }, 0) / sel.length * 100;
+      var ac = h / sel.length * 100, gap = ac - ex;
+      return "<tr><td>" + b[2] + "</td><td>" + sel.length + "</td><td>" + ac.toFixed(0) +
+        "%</td><td>" + ex.toFixed(0) + "%</td><td class='" + (gap >= 0 ? "hit" : "miss") + "'>" +
+        (gap >= 0 ? "+" : "") + gap.toFixed(0) + "%p</td></tr>";
+    }).join("");
+
+    var LOGN = 200;
+    var logRows = REC.slice().reverse().slice(0, LOGN);
+    document.getElementById("recLog").innerHTML = logRows.map(function (r) {
+      var won = r.hit ? r.pick : (r.pick === r.home ? r.away : r.home);
+      return "<tr><td>" + r.date + "</td><td>" + r.lg + "</td><td>" + r.away + " @ " + r.home +
+        "</td><td>" + r.pick + "</td><td>" +
+        (Math.max(r.pHome, 1 - r.pHome) * 100).toFixed(0) + "%</td><td>" +
+        (r.score || "") + " " + won + "</td><td class='" + (r.hit ? "hit" : "miss") + "'>" +
+        (r.hit ? "적중" : "실패") + "</td></tr>";
+    }).join("") + (REC.length > LOGN
+      ? "<tr><td colspan='7' style='color:var(--ink-faint);font-size:.8rem'>최근 " +
+        LOGN + "경기만 표시 · 위 통계는 " + REC.length + "경기 전부로 계산했습니다</td></tr>"
+      : "");
+
+    // 월별 -- "요즘은 어떤가"를 보는 칸
+    var byM = {};
+    REC.forEach(function (r) {
+      var m = r.date.slice(0, 7), k = r.lg + "|" + m;
+      byM[k] = byM[k] || { n: 0, h: 0 };
+      byM[k].n++; byM[k].h += r.hit ? 1 : 0;
+    });
+    var months = Object.keys(byM).map(function (k) { return k.split("|")[1]; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    var lgsM = Object.keys(byM).map(function (k) { return k.split("|")[0]; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    var mh = "<tr><th>리그</th>" + months.map(function (m) {
+      return "<th>" + m.slice(5) + "월</th>"; }).join("") + "</tr>";
+    var mb = lgsM.map(function (lg) {
+      return "<tr><td>" + lg + "</td>" + months.map(function (m) {
+        var v = byM[lg + "|" + m];
+        var cell = v ? (v.h / v.n * 100).toFixed(1) + "%" : "—";
+        return "<td>" + cell + "</td>";
+      }).join("") + "</tr>";
+    }).join("");
+    document.getElementById("recByMonth").innerHTML = mh + mb;
+  }
+  function card(k, v, d) {
+    return '<div class="rec-card"><div class="k">' + k + '</div><div class="v">' + v +
+      '</div><div class="d">' + d + '</div></div>';
+  }
+  // 성적표는 압축돼 있어 해독이 끝난 뒤에 그립니다.
+  (window.__TRACK__ || Promise.resolve([])).then(function (rows) {
+    REC = rows || [];
+    try { renderRecord(); } catch (e) { console.error(e); }
+  });
+
+  // ---- 축구 (4대 리그, 승무패) ----
+  // 검증: 2018~2026 시즌, 홀드아웃 2023-24~2025-26 (n=4,310), 다이슨-콜스 포아송 모델.
+  // 등급 밴드·문구는 이 홀드아웃에서 실측한 값입니다 (섹션 하단 표와 동일한 숫자).
+  var SOCCER_LEAGUE_NOTE = {
+    EPL: "잉글랜드 프리미어리그", LaLiga: "스페인 라리가",
+    Bundesliga: "독일 분데스리가", SerieA: "이탈리아 세리에A",
+    Ligue1: "프랑스 리그앙 · 2026-09-07 검증 통과"
+  };
+  // 축구도 같은 방식 -- 모델이 고른 결과(홈/무/원정)를 기준으로 시장과 몇 %p 벌어졌나.
+  function soccerGapNote(g, inline) {
+    if (g.mktH == null) return "";
+    var opts = [["H", g.pH, g.mktH], ["D", g.pD, g.mktD], ["A", g.pA, g.mktA]];
+    var pick = opts.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
+    var mktPick = opts.reduce(function (a, b) { return b[2] > a[2] ? b : a; });
+    var d = (pick[1] - pick[2]) * 100;
+    var cls, txt;
+    if (pick[0] !== mktPick[0]) { cls = "op"; txt = "반대쪽"; }
+    else if (Math.abs(d) < 1) { cls = "eq"; txt = "차이 없음"; }
+    else if (d > 0) { cls = "up"; txt = "모델 +" + d.toFixed(1) + "%p"; }
+    else { cls = "dn"; txt = "시장 +" + Math.abs(d).toFixed(1) + "%p"; }
+    return '<span class="gapnote ' + cls + '"' +
+      (inline ? ' style="display:inline;margin:0 0 0 6px"' : '') + '>' + txt + '</span>';
+  }
+
+  function soccerSides(g) {
+    // 모델과 시장이 홈/무/원정 중 서로 다른 쪽을 골랐는지.
+    if (g == null || g.mktH == null) return false;
+    function top(h, d, a) { return (h >= d && h >= a) ? "H" : ((a >= d && a >= h) ? "A" : "D"); }
+    return top(g.pH, g.pD, g.pA) !== top(g.mktH, g.mktD, g.mktA);
+  }
+  function soccerTier(diff, opposite) {
+    function T(opp, r) {
+      if (!opp) return r;
+      // 확신 차이는 작아도 고른 쪽이 다르면 같은 편이 아닙니다. 색은 경고로 올립니다.
+      return { c: (r.c === "a" || r.c === "b") ? "c" : r.c,
+               t: "반대 · 서로 다른 쪽",
+               m: "모델과 시장이 아예 다른 쪽을 찍었습니다. 홈 확률 차이는 " +
+                  r.t.split(" · ")[0] + " 수준이지만 고른 쪽이 다르니 같은 편으로 보면 안 됩니다. " +
+                  "이 자리만 따로 뽑은 홀드아웃 수치는 아직 없습니다." };
+    }
+    if (diff < 0.05) return T(opposite, {c:"a", t:"A · 모델·시장 일치",
+      m:"모델과 시장이 같은 쪽을, 비슷한 확신으로 봅니다. 이 구간(5%p 미만)에서는 홀드아웃 4,310경기 중 2,549경기가 여기 속했고 모델 53.7% · 시장 54.1%로 거의 같이 맞았습니다."});
+    if (diff < 0.10) return T(opposite, {c:"b", t:"B · 방향 대체로 일치",
+      m:"같은 쪽을 골랐지만 확신 정도가 5~10%p 다릅니다. 이 구간(1,242경기)에서는 모델 53.1% · 시장 54.3%로 아직 비슷합니다."});
+    if (diff < 0.20) return T(opposite, {c:"c", t:"C · 뚜렷하게 엇갈림",
+      m:"확신 차이가 10~20%p로 꽤 큽니다. 이 구간(479경기)에서는 시장이 더 맞았습니다 — 모델 44.9% · 시장 54.7%."});
+    return T(opposite, {c:"d", t:"D · 크게 엇갈림",
+      m:"모델과 시장이 20%p 이상 벌어졌습니다. 홀드아웃에서 가장 위험한 구간(40경기)으로, 모델 37.5% · 시장 47.5% — 이럴 땐 시장 쪽이 맞았을 가능성이 더 큽니다."});
+  }
+  function kstTime(iso) {
+    try {
+      var d = new Date(iso);
+      var k = new Date(d.getTime() + 9 * 3600 * 1000);
+      var mm = String(k.getUTCMonth() + 1).padStart(2, "0");
+      var dd = String(k.getUTCDate()).padStart(2, "0");
+      var hh = String(k.getUTCHours()).padStart(2, "0");
+      var mi = String(k.getUTCMinutes()).padStart(2, "0");
+      return mm + "/" + dd + " " + hh + ":" + mi + " KST";
+    } catch (e) { return "?"; }
+  }
+  function pct(x) { return x == null ? "-" : Math.round(x * 100) + "%"; }
+  function pct1(x) { return x == null ? "-" : (x * 100).toFixed(1) + "%"; }
+  function segBar(h, d, a) {
+    return '<div class="seg-track">' +
+      '<div class="seg-fill seg-home" style="width:' + (h*100).toFixed(1) + '%"></div>' +
+      '<div class="seg-fill seg-draw" style="width:' + (d*100).toFixed(1) + '%"></div>' +
+      '<div class="seg-fill seg-away" style="width:' + (a*100).toFixed(1) + '%"></div>' +
+      '</div>';
+  }
+  function soccerPickLabel(h, d, a, home, away) {
+    if (h >= d && h >= a) return home + " 승";
+    if (a >= d && a >= h) return away + " 승";
+    return "무승부";
+  }
+  /* ===== 축구 경기 상세 화면 ==========================================
+     모델이 속으로 쓴 숫자(득점 기대치·공수 배수)와, 확률에는 안 들어가지만
+     "왜 이런 경기인가"를 눈으로 보게 해 주는 자료(최근 폼·맞대결)를 한 판에
+     모았습니다. 탭 전환은 기존 .dtab 위임 핸들러가 그대로 처리합니다. */
+  var SPSEQ = 0;
+  function sesc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function xmul(v) { return v == null ? "-" : v.toFixed(2) + "배"; }
+  function cmpCls(v, goodHigh) {
+    // class 를 따로 붙이면 td 에 class 속성이 두 번 생겨 뒤엣것이 무시됩니다.
+    // 그래서 클래스 이름만 돌려주고 호출부에서 합칩니다.
+    if (v == null) return "";
+    var good = goodHigh ? v >= 1.08 : v <= 0.92;
+    var bad = goodHigh ? v <= 0.92 : v >= 1.08;
+    return good ? " dbetter" : (bad ? " dthin" : "");
+  }
+
+  function spTabPower(g) {
+    var H = sko(g.home), A = sko(g.away);
+    if (g.lam == null) return '<div class="dnote">이 경기는 모델 내부값이 아직 안 실렸습니다.</div>';
+    var h = '<h4>득점 기대치</h4><table><thead><tr><th>팀</th><th>기대 득점</th>' +
+      '<th>공격</th><th>수비(실점)</th></tr></thead><tbody>' +
+      '<tr><td>' + sesc(H) + ' <span style="color:var(--ink-faint)">(홈)</span></td>' +
+        '<td class="dmono">' + g.lam.toFixed(2) + '</td>' +
+        '<td class="dmono' + cmpCls(g.atkH, true) + '">' + xmul(g.atkH) + '</td>' +
+        '<td class="dmono' + cmpCls(g.defH, false) + '">' + xmul(g.defH) + '</td></tr>' +
+      '<tr><td>' + sesc(A) + '</td>' +
+        '<td class="dmono">' + g.mu.toFixed(2) + '</td>' +
+        '<td class="dmono' + cmpCls(g.atkA, true) + '">' + xmul(g.atkA) + '</td>' +
+        '<td class="dmono' + cmpCls(g.defA, false) + '">' + xmul(g.defA) + '</td></tr>' +
+      '</tbody></table>' +
+      '<div class="dnote" style="margin-top:8px">' +
+      '<b>기대 득점</b>은 이 경기에서 몇 골 넣을 것으로 보는지입니다. ' +
+      '<b>공격</b>·<b>수비</b>는 리그 평균을 1.00 으로 놓은 배수예요. ' +
+      '공격 1.20 이면 평균보다 20% 더 넣는 팀, 수비 1.20 이면 평균보다 20% 더 <u>먹는</u> 팀입니다 ' +
+      '(수비는 낮을수록 좋습니다). 홈 이점은 ' +
+      '<span class="dmono">' + (g.hfa == null ? "-" : g.hfa.toFixed(2) + "배") + '</span> 로 이미 홈 기대 득점에 들어가 있습니다.' +
+      '</div>';
+    if (g.fallback) {
+      h += '<div class="dnote" style="margin-top:6px;color:var(--bad)">' +
+        '이 경기 팀 중 하나는 과거 1부 기록이 없어(승격팀 등) 하위권 평균으로 대신 넣었습니다. 숫자를 그대로 믿지 마세요.</div>';
+    }
+    return h;
+  }
+
+  function spFormBlock(name, f) {
+    if (!f) return '<div class="dsub">' + sesc(name) + '</div>' +
+      '<div class="dnote">최근 경기 기록이 없습니다.</div>';
+    var chips = f.games.map(function (x) {
+      var col = x.r === "W" ? "var(--good)" : (x.r === "L" ? "var(--bad)" : "var(--ink-faint)");
+      return '<span class="dmono" style="color:' + col + ';font-weight:700">' + x.r + '</span>';
+    }).join(" ");
+    var rows = f.games.map(function (x) {
+      var col = x.r === "W" ? "win" : (x.r === "L" ? "lose" : "");
+      return '<tr><td class="dmono">' + sesc(x.d) + '</td>' +
+        '<td>' + (x.ha === "H" ? "홈" : "원정") + ' · ' + sesc(sko(x.opp)) + '</td>' +
+        '<td class="dmono">' + x.gf + '-' + x.ga + '</td>' +
+        '<td' + (col ? ' class="' + col + '"' : "") + '>' +
+        (x.r === "W" ? "승" : x.r === "D" ? "무" : "패") + '</td></tr>';
+    }).join("");
+    return '<div class="dsub">' + sesc(name) + ' — ' + f.w + '승 ' + f.d + '무 ' + f.l + '패 · ' +
+      '득 ' + f.gf + ' 실 ' + f.ga + ' &nbsp; ' + chips + '</div>' +
+      '<table><thead><tr><th>날짜</th><th>상대</th><th>스코어</th><th>결과</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table>';
+  }
+
+  function spTabForm(g) {
+    return '<h4>최근 5경기</h4>' +
+      spFormBlock(sko(g.home) + " (홈)", g.formH) +
+      spFormBlock(sko(g.away), g.formA) +
+      '<div class="dnote" style="margin-top:8px">최신 경기가 맨 위입니다. ' +
+      '모델은 이 기록을 이미 3시즌 전체로 학습했기 때문에, 여기 표는 <b>다시 더하는 가중치가 아니라</b> ' +
+      '위 확률이 왜 그렇게 나왔는지 눈으로 확인하는 용도입니다.</div>';
+  }
+
+  function spTabH2H(g) {
+    var x = g.h2h;
+    if (!x || !x.games.length) {
+      return '<h4>맞대결</h4><div class="dnote">최근 3시즌 안에 두 팀이 붙은 기록이 없습니다 ' +
+        '(승격·강등으로 리그가 달랐던 경우).</div>';
+    }
+    var rows = x.games.map(function (r) {
+      var cls = r.hg > r.ag ? "win" : (r.hg < r.ag ? "lose" : "");
+      return '<tr><td class="dmono">' + sesc(r.d) + '</td>' +
+        '<td>' + sesc(sko(r.h)) + ' vs ' + sesc(sko(r.a)) + '</td>' +
+        '<td class="dmono' + (cls ? " " + cls : "") + '">' + r.hg + '-' + r.ag + '</td></tr>';
+    }).join("");
+    return '<h4>맞대결 최근 ' + x.games.length + '경기</h4>' +
+      '<div class="dsub">' + sesc(sko(g.home)) + ' ' + x.hw + '승 · 무 ' + x.d + ' · ' +
+      sesc(sko(g.away)) + ' ' + x.aw + '승 <span style="text-transform:none">(홈·원정 가리지 않고 셈)</span></div>' +
+      '<table><thead><tr><th>날짜</th><th>경기</th><th>스코어</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="dnote" style="margin-top:8px">맞대결 전적은 <b>모델이 안 씁니다.</b> ' +
+      '표본이 몇 경기뿐이라 팀 전력 지표보다 잘 맞은 적이 없어서요. 참고만 하세요.</div>';
+  }
+
+  function spTabScore(g) {
+    if (!g.top || !g.top.length) return '<div class="dnote">스코어 분포가 아직 안 실렸습니다.</div>';
+    var max = g.top[0].p;
+    var rows = g.top.map(function (s) {
+      var w = Math.max(4, Math.round(s.p / max * 100));
+      return '<tr><td class="dmono">' + sesc(s.s) + '</td>' +
+        '<td style="width:60%"><div class="seg-track" style="height:9px">' +
+        '<div class="seg-fill" style="width:' + w + '%;background:var(--model)"></div></div></td>' +
+        '<td class="dmono">' + (s.p * 100).toFixed(1) + '%</td></tr>';
+    }).join("");
+    return '<h4>가장 그럴듯한 스코어</h4>' +
+      '<table><thead><tr><th>스코어</th><th></th><th>확률</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="dnote" style="margin-top:8px">홈 스코어가 앞입니다. ' +
+      (g.pOver25 != null
+        ? '2.5골 오버 확률은 <b class="dmono">' + (g.pOver25 * 100).toFixed(1) + '%</b> 입니다. '
+        : '') +
+      '<b>오버·언더는 따로 검증한 적이 없습니다.</b> 1X2 확률을 만드는 과정에서 같이 떨어진 값이라, ' +
+      '맞는지 세어본 기록이 없으니 그냥 참고용으로만 보세요.</div>';
+  }
+
+  function soccerPanel(g) {
+    if (g.lam == null && !g.formH && !g.h2h) return "";
+    var uid = "sp" + (++SPSEQ);
+    var tabs = [["전력", spTabPower(g)], ["최근 폼", spTabForm(g)],
+                ["맞대결", spTabH2H(g)], ["스코어", spTabScore(g)]];
+    var strip = '<div class="dtabs" data-uid="' + uid + '">', body = "";
+    tabs.forEach(function (t, i) {
+      strip += '<button type="button" class="dtab' + (i === 0 ? " on" : "") +
+        '" data-uid="' + uid + '" data-i="' + i + '">' + t[0] + '</button>';
+      body += '<div class="dpane" data-uid="' + uid + '" data-i="' + i + '"' +
+        (i === 0 ? "" : " hidden") + '>' + t[1] + '</div>';
+    });
+    strip += '</div>';
+    return '<details class="deep"><summary>자세히 보기 — 전력 · 최근 폼 · 맞대결 · 스코어</summary>' +
+      '<div class="deep-body">' + strip + '<div class="dsec">' + body + '</div>' +
+      '<div class="dnote" style="padding:0 2px"><b>위 확률에 들어가는 건 3시즌 경기 결과뿐입니다</b>' +
+      '(Dixon-Coles). 최근 폼·맞대결은 확률을 바꾸지 않고, 이미 배당에도 반영돼 있는 정보입니다.</div>' +
+      '</div></details>';
+  }
+
+  function renderSoccer() {
+    var wrap = document.getElementById("soccerGames");
+    if (!wrap) return;
+    var raw = document.getElementById("soccerData");
+    if (!raw) { wrap.innerHTML = ""; return; }
+    var data;
+    try { data = JSON.parse(raw.textContent); } catch (e) { wrap.innerHTML = ""; return; }
+    var order = ["EPL", "LaLiga", "Bundesliga", "SerieA", "Ligue1"];
+    var html = "";
+    var any = false;
+    order.forEach(function (lg) {
+      var games = (data.leagues && data.leagues[lg]) || [];
+      if (!games.length) return;
+      any = true;
+      var mine = games.slice().sort(function (a, b) {
+        var d = (isPastKickoff(a) ? 1 : 0) - (isPastKickoff(b) ? 1 : 0);
+        if (d !== 0) return d;
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
+      html += '<div class="lg-head"><span class="lg-name">' + lg + '</span>' +
+        '<span class="lg-note">' + SOCCER_LEAGUE_NOTE[lg] + '</span></div>';
+
+      mine.forEach(function (g) {
+        var past = isPastKickoff(g);
+        var statusTxt = g.started
+          ? (g.status === "STATUS_FULL_TIME" ? "종료" +
+              (g.hScore != null ? " " + g.hScore + "-" + g.aScore : "")
+            : "진행중" + (g.hScore != null ? " " + g.hScore + "-" + g.aScore : ""))
+          : kstTime(g.date);
+        var pickTxt = soccerPickLabel(g.pH, g.pD, g.pA, sko(g.home), sko(g.away));
+        var pickPct = Math.max(g.pH, g.pD, g.pA);
+        var fb = g.fallback
+          ? ' <span class="startedTag" title="상위리그 과거 기록이 없어 하위권 평균으로 대체">[신규승격 추정]</span>'
+          : '';
+
+        var tierHtml = '<span class="tier none" style="margin-left:8px">배당 없음</span>';
+        var verdictHtml = '';
+        var mktRow = '<div class="probs3"><span class="p-lab market">시장</span>' +
+          '<span class="p-empty">' + (past ? "라이브 배당은 비교 안 함" : "프리매치 배당 없음") + '</span></div>';
+
+        if (!past && g.mktH != null) {
+          var diff = Math.abs(g.pH - g.mktH);
+          var T = soccerTier(diff, soccerSides(g));
+          tierHtml = '<span class="tier ' + T.c + '" style="margin-left:8px">' + T.t +
+            soccerGapNote(g, true) + '</span>';
+          verdictHtml = '<div class="verdictline on ' +
+            (T.c === "a" ? "agree" : T.c === "b" ? "mild" : T.c === "c" ? "warn" : "danger") +
+            '"><span class="vt">' + T.t + '</span>' + T.m + '</div>';
+          mktRow = '<div class="probs3"><span class="p-lab market">시장</span>' +
+            segBar(g.mktH, g.mktD, g.mktA) +
+            '<span class="seg-vals">홈 ' + pct(g.mktH) + ' · 무 ' + pct(g.mktD) + ' · 원정 ' + pct(g.mktA) +
+            (g.book ? ' <span style="color:var(--ink-faint)">(' + g.book + ')</span>' : '') + '</span></div>';
+        }
+
+        html += '<div class="game' + (past ? " started" : "") + '">' +
+          '<div class="g-top"><div>' +
+            '<div class="matchup">' + sko(g.home) + '<span class="at">vs</span>' + sko(g.away) + fb + '</div>' +
+          '</div><span class="status">' + statusTxt + startedTagText(g, past) + '</span></div>' +
+
+          '<div class="pickwrap">' +
+            '<span class="picklabel">모델 픽</span>' +
+            '<span class="pickteam">' + pickTxt + '</span>' +
+            '<span class="pickpct">' + pct1(pickPct) + '</span>' +
+            tierHtml +
+          '</div>' +
+
+          '<div class="probs3"><span class="p-lab model">모델</span>' +
+            segBar(g.pH, g.pD, g.pA) +
+            '<span class="seg-vals">홈 ' + pct(g.pH) + ' · 무 ' + pct(g.pD) + ' · 원정 ' + pct(g.pA) + '</span>' +
+          '</div>' +
+          mktRow +
+          '<div class="seg-legend"><span class="lh">홈승</span><span class="ld">무승부</span><span class="la">원정승</span></div>' +
+          verdictHtml +
+          soccerPanel(g) +
+          '</div>';
+      });
+    });
+    wrap.innerHTML = any ? html : (function () {
+      // 경기가 없는 게 '쉬는 중'인지 '수집이 죽음'인지 구분해 줍니다.
+      var nd = data.nextDate || {};
+      var ks = Object.keys(nd).sort(function (x, y) { return nd[x] < nd[y] ? -1 : 1; });
+      if (!ks.length) return '<p style="color:var(--ink-faint)">예정된 경기가 없습니다.</p>';
+      return '<div class="dsec"><h4>지금은 리그 휴식기입니다</h4>' +
+        '<div class="dnote">국제 A매치 등으로 리그가 쉬는 기간입니다. 고장이 아닙니다.<br>' +
+        ks.map(function (k) { return lgLabel(k) + ' <b>' + nd[k] + '</b> 재개'; }).join(' · ') +
+        '</div></div>';
+    })();
+    renderSoccerSummary(data, order);
+  }
+
+  var SOCCER_TIER_ORDER = { a: 0, b: 1, c: 2, d: 3, none: 4 };
+  function renderSoccerSummary(data, order) {
+    var body = document.getElementById("soccerPickList");
+    if (!body) return;
+    var rows = [];
+    order.forEach(function (lg) {
+      var games = (data.leagues && data.leagues[lg]) || [];
+      games.forEach(function (g) {
+        var pastG = isPastKickoff(g);
+        var T = (!pastG && g.mktH != null) ? soccerTier(Math.abs(g.pH - g.mktH), soccerSides(g)) : {c:"none", t:"배당 없음"};
+        rows.push({ lg: lg, g: g, T: T });
+      });
+    });
+    rows.sort(function (x, y) {
+      // 이미 시작한(=사실상 끝난) 경기는 맨 아래로. 각 그룹 안에서는 킥오프 시각 오름차순.
+      var xs = isPastKickoff(x.g) ? 1 : 0, ys = isPastKickoff(y.g) ? 1 : 0;
+      if (xs !== ys) return xs - ys;
+      return new Date(x.g.date).getTime() - new Date(y.g.date).getTime();
+    });
+    // 야구와 같은 방식 -- 표 대신 한국말 한 줄.
+    body.innerHTML = rows.map(function (r) {
+      var g = r.g;
+      var past = isPastKickoff(g);
+      var hKo = sko(g.home), aKo = sko(g.away);
+      var pickTxt = soccerPickLabel(g.pH, g.pD, g.pA, hKo, aKo);
+      var pickPct = Math.max(g.pH, g.pD, g.pA) * 100;
+      var say, num = '모델 ' + pickPct.toFixed(1) + '%';
+
+      if (past) {
+        var sc = (g.hScore != null && g.aScore != null) ? ' ' + g.hScore + '-' + g.aScore : '';
+        say = '<b>' + pickTxt + '</b> — ' +
+          (g.status === "STATUS_FULL_TIME" ? '종료' + sc : '진행 중' + sc) +
+          '. 결과는 아래 성적표에 자동으로 들어갑니다';
+      } else if (g.mktH == null) {
+        say = '<b>' + pickTxt + '</b> — 배당이 아직 없어 시장과 대조를 못 했습니다';
+      } else {
+        var opts = [["H", g.pH, g.mktH], ["D", g.pD, g.mktD], ["A", g.pA, g.mktA]];
+        var mine = opts.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
+        var theirs = opts.reduce(function (a, b) { return b[2] > a[2] ? b : a; });
+        var mktTxt = soccerPickLabel(g.mktH, g.mktD, g.mktA, hKo, aKo);
+        var d = (mine[1] - mine[2]) * 100;
+        num += ' · 시장 ' + pct1(Math.max(g.mktH, g.mktD, g.mktA)) + ' ' + mktTxt +
+               ' · 차이 ' + Math.abs(d).toFixed(1) + '%p';
+        if (mine[0] !== theirs[0]) {
+          say = '<b>' + pickTxt + '</b> — 시장은 <span class="badw">' + mktTxt +
+                '</span>. 서로 반대입니다. 과거엔 이런 자리에서 시장이 이겼습니다';
+        } else if (Math.abs(d) < 5) {
+          say = '<b>' + pickTxt + '</b> — 모델도 시장도 같은 편. 특별할 거 없습니다';
+        } else if (d > 0) {
+          say = '<b>' + pickTxt + '</b> — <span class="warnw">모델이 시장보다 ' +
+                d.toFixed(1) + '%p 높게</span> 봅니다. 과거엔 이런 자리에서 시장이 더 맞았습니다';
+        } else {
+          say = '<b>' + pickTxt + '</b> — 시장이 ' + Math.abs(d).toFixed(1) +
+                '%p 더 확신합니다. 모델이 조심스러운 쪽입니다';
+        }
+      }
+      if (g.fallback) {
+        say += ' <span class="startedTag" title="상위리그 과거 기록이 없어 하위권 평균으로 대체">[신규승격 추정]</span>';
+      }
+      var tag = past ? ' <span class="startedTag">' +
+        (g.started ? '시작함' : '시작 시각 지남(추정)') + '</span>' : '';
+
+      return '<div class="pk-row ' + r.T.c + (past ? ' past' : '') + '">' +
+        '<span class="pk-dot"></span><div class="pk-body">' +
+          '<div class="pk-top"><span class="pk-time">' +
+            kstTime(g.date).replace(" KST", "") + '</span>' +
+            '<span class="pk-lg">' + lgLabel(r.lg) + '</span>' +
+            '<span class="pk-match">' + hKo + ' vs ' + aKo + '</span>' + tag +
+          '</div>' +
+          '<div class="pk-say">' + say + '</div>' +
+          '<div class="pk-num">' + num + '</div>' +
+        '</div></div>';
+    }).join("") || '<p class="hint" style="padding:10px 0">예정된 경기가 없습니다.</p>';
+  }
+  function lgLabel(lg) {
+    return { EPL:"EPL", LaLiga:"라리가", Bundesliga:"분데스리가", SerieA:"세리에A", Ligue1:"리그앙" }[lg] || lg;
+  }
+  renderSoccer();
+
+  // ---- 야구/축구 탭 전환 (스크롤 줄이기용) ----
+  var TABKEY = "sports-tab-view-20260829";
+  function countGames(GAMES) { return GAMES.length; }
+  function soccerCount() {
+    try {
+      var d = JSON.parse(document.getElementById("soccerData").textContent);
+      var n = 0;
+      Object.keys(d.leagues || {}).forEach(function (k) { n += (d.leagues[k] || []).length; });
+      return n;
+    } catch (e) { return 0; }
+  }
+  function setTab(which) {
+    var bb = document.getElementById("baseballGroup");
+    var sc = document.getElementById("soccerSection");
+    var tb = document.getElementById("tabBaseball");
+    var ts = document.getElementById("tabSoccer");
+    bb.hidden = which !== "baseball";
+    sc.hidden = which !== "soccer";
+    tb.classList.toggle("on", which === "baseball");
+    ts.classList.toggle("on", which === "soccer");
+    try { localStorage.setItem(TABKEY, which); } catch (e) { /* ignore */ }
+  }
+  (function initTabs() {
+    var tb = document.getElementById("tabBaseball");
+    var ts = document.getElementById("tabSoccer");
+    tb.innerHTML = "⚾ 야구 (MLB·KBO·NPB)" + '<span class="cnt">' + countGames(GAMES) + '경기</span>';
+    ts.innerHTML = "⚽ 축구 (5대리그)" + '<span class="cnt">' + soccerCount() + '경기</span>';
+    tb.addEventListener("click", function () { setTab("baseball"); });
+    ts.addEventListener("click", function () { setTab("soccer"); });
+    var saved = "baseball";
+    try { saved = localStorage.getItem(TABKEY) || "baseball"; } catch (e) { /* ignore */ }
+    setTab(saved === "soccer" ? "soccer" : "baseball");
+  })();
+
+  autoSeed();
+  render();
+})();
+</script>
+
+
+<script>
+/* 배당 흐름(CLV) -- 픽 시점 배당 대 그 뒤 마지막으로 본 배당.
+   경기 결과를 안 기다려도 되는 지표라, 승패 적중률보다 훨씬 빨리 판정이 납니다.
+   기록은 daily_update.py 가 매 실행마다 사전에 남깁니다(나중에 맞춰보는 게 아닙니다). */
+(function () {
+  "use strict";
+  var el = document.getElementById("clvBox");
+  if (!el) return;
+  var raw = document.getElementById("clvLog");
+  var data = { open: {}, settled: [] };
+  try { data = JSON.parse(raw.textContent) || data; } catch (e) { /* ignore */ }
+  var all = (data.settled || []).filter(function (r) { return typeof r.clv === "number"; });
+  // 스냅샷을 한 번밖에 못 찍은 경기는 first==last 라 clv 가 기계적으로 0입니다.
+  // '안 움직였다'가 아니라 '못 쟀다'이므로 평균에서 빼야 숫자가 정직해집니다.
+  var rows = all.filter(function (r) { return r.measured !== 0; });
+  var unmeasured = all.length - rows.length;
+  var nOpen = Object.keys(data.open || {}).length;
+
+  function wilson(k, n) {
+    if (!n) return [0, 0];
+    var z = 1.96, p = k / n, d = 1 + z * z / n;
+    var c = (p + z * z / (2 * n)) / d;
+    var m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+    return [Math.max(0, c - m), Math.min(1, c + m)];
+  }
+  function pct(x) { return (x * 100).toFixed(1) + "%"; }
+
+  var lab = '<div class="rec-lab" style="margin-top:16px">' +
+    '배당 흐름 (CLV) — 픽 시점 가격이 그 뒤 움직임보다 유리했나</div>';
+
+  if (!rows.length) {
+    el.innerHTML = lab + '<div class="rec-card"><div class="d">아직 마감된 기록이 없습니다.' +
+      (nOpen ? ' 지금 ' + nOpen + '경기를 추적 중입니다.' : '') +
+      ' 판정에는 300~500건이 필요하고, MLB 기준 대략 3~4주 걸립니다.</div></div>';
+    return;
+  }
+
+  var moved = rows.filter(function (r) { return r.clv !== 0; });
+  var win = moved.filter(function (r) { return r.clv > 0; }).length;
+  var ci = wilson(win, moved.length);
+  var mean = rows.reduce(function (a, r) { return a + r.clv; }, 0) / rows.length;
+  var nHit = rows.filter(function (r) { return r.hit === 0 || r.hit === 1; }).length;
+  var sig = moved.length && ci[0] > 0.5 ? "유리 쪽으로 유의" :
+            (moved.length && ci[1] < 0.5 ? "불리 쪽으로 유의" : "아직 판정 불가");
+
+  var byLg = {};
+  rows.forEach(function (r) {
+    var b = byLg[r.lg] || (byLg[r.lg] = { n: 0, w: 0, m: 0, mv: 0 });
+    b.n++; b.m += r.clv;
+    if (r.clv !== 0) { b.mv++; if (r.clv > 0) b.w++; }
+  });
+
+  var html = lab + '<div class="rec-cards">' +
+    '<div class="rec-card"><div class="k">마감 기록</div><div class="v">' + rows.length +
+      '</div><div class="d">추적 중 ' + nOpen + '건</div></div>' +
+    '<div class="rec-card"><div class="k">유리했던 비율</div><div class="v">' +
+      (moved.length ? pct(win / moved.length) : "—") + '</div><div class="d">' +
+      (moved.length ? '95% CI ' + pct(ci[0]) + '~' + pct(ci[1]) : '움직인 경기 없음') +
+      '</div></div>' +
+    '<div class="rec-card"><div class="k">평균 CLV</div><div class="v">' +
+      (mean >= 0 ? "+" : "") + mean.toFixed(2) + '%</div><div class="d">' + sig + '</div></div>' +
+    '<div class="rec-card"><div class="k">배당이 움직인 경기</div><div class="v">' +
+      moved.length + '</div><div class="d">전체 ' + rows.length + '건 중</div></div>' +
+    '</div>' +
+    '<p class="d" style="font-size:.8rem;color:var(--ink-faint);margin:-6px 0 12px">' +
+      '결과까지 붙은 기록 ' + nHit + '건' +
+      (unmeasured ? ' · 스냅샷을 한 번밖에 못 찍어 움직임을 못 잰 ' + unmeasured +
+                    '건은 위 숫자에서 뺐습니다' : '') +
+      '. 판정에는 300~500건이 필요합니다 — 아직 중간 경과입니다.</p>';
+
+  html += '<div class="sum-scroll"><table><thead><tr><th>리그</th><th>기록</th>' +
+    '<th>움직임</th><th>유리</th><th>평균 CLV</th></tr></thead><tbody>';
+  Object.keys(byLg).sort().forEach(function (k) {
+    var b = byLg[k];
+    html += '<tr><td>' + k + '</td><td>' + b.n + '</td><td>' + b.mv + '</td><td>' +
+      (b.mv ? pct(b.w / b.mv) : "—") + '</td><td>' +
+      (b.m / b.n >= 0 ? "+" : "") + (b.m / b.n).toFixed(2) + '%</td></tr>';
+  });
+  html += '</tbody></table></div>';
+
+  var recent = rows.slice(-40).reverse();
+  html += '<details class="rec-log"><summary>최근 기록 보기</summary><div class="sum-scroll">' +
+    '<table><thead><tr><th>날짜</th><th>리그</th><th>경기</th><th>픽</th>' +
+    '<th>픽 시점</th><th>마지막</th><th>CLV</th><th>결과</th></tr></thead><tbody>';
+  recent.forEach(function (r) {
+    var cls = r.clv > 0 ? "hit" : (r.clv < 0 ? "miss" : "");
+    html += '<tr><td>' + r.date + '</td><td>' + r.lg + '</td><td>' + r.away + '@' + r.home +
+      '</td><td>' + (r.pick === "H" ? r.home : r.away) + '</td><td>' + r.oPick +
+      '</td><td>' + r.oLast + '</td><td class="' + cls + '">' +
+      (r.clv >= 0 ? "+" : "") + r.clv.toFixed(2) + '%</td><td>' +
+      (r.hit === 1 ? "적중" : (r.hit === 0 ? "빗나감" : "—")) + '</td></tr>';
+  });
+  html += '</tbody></table></div></details>';
+
+  html += '<p class="rec-lab" style="margin-top:8px;text-transform:none;letter-spacing:0;' +
+    'font-size:.78rem;">"마지막"은 진짜 종가가 아니라 <b>갱신 작업이 경기 전 마지막으로 본 배당</b>입니다 ' +
+    '— MLB는 보통 시작 3~4시간 전, KBO·NPB는 30분~1시간 전. 진짜 종가를 보려면 경기 직전 ' +
+    '스냅샷을 더 찍어야 합니다. 픽이 중간에 바뀐 경기는 바뀐 시점을 새 기준으로 다시 잡습니다.</p>';
+
+  el.innerHTML = html;
+})();
+</script>
+
+<script>
+/* 축구 픽 성적표 -- 경기 전에 기록해둔 픽을 ESPN 결과로 자동 정산한 것.
+   소급해서 맞춰본 게 아니라 soccerData.record 에 미리 쌓인 기록입니다. */
+(function () {
+  "use strict";
+  var el = document.getElementById("soccerRecordBox");
+  if (!el) return;
+  var data = {};
+  try { data = JSON.parse(document.getElementById("soccerData").textContent) || {}; }
+  catch (e) { return; }
+  var rows = (data.record || []).filter(function (r) { return typeof r.hit === "number"; });
+  var open = Object.keys(data.picks || {}).length;
+
+  function wilson(k, n) {
+    if (!n) return [0, 0];
+    var z = 1.96, p = k / n, d = 1 + z * z / n;
+    var c = (p + z * z / (2 * n)) / d;
+    var m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+    return [Math.max(0, c - m), Math.min(1, c + m)];
+  }
+  function pct(x) { return (x * 100).toFixed(1) + "%"; }
+
+  var head = '<div class="rec-lab" style="margin-top:20px">축구 픽 성적표 — 경기 전에 기록한 픽만</div>';
+  if (!rows.length) {
+    el.innerHTML = head + '<div class="rec-card"><div class="d">아직 정산된 경기가 없습니다.' +
+      (open ? ' 지금 ' + open + '경기 픽을 기록해두고 결과를 기다리는 중입니다.' : '') +
+      '</div></div>';
+    return;
+  }
+  var hit = rows.reduce(function (a, r) { return a + r.hit; }, 0);
+  var ci = wilson(hit, rows.length);
+  var base = rows.filter(function (r) { return r.res === "H"; }).length / rows.length;
+  var meanP = rows.reduce(function (a, r) { return a + r.pPick; }, 0) / rows.length;
+  var clvRows = rows.filter(function (r) { return typeof r.clv === "number" && r.clv !== 0; });
+  var clvWin = clvRows.filter(function (r) { return r.clv > 0; }).length;
+
+  var html = head + '<div class="rec-cards">' +
+    '<div class="rec-card"><div class="k">정산 경기</div><div class="v">' + rows.length +
+      '</div><div class="d">추적 중 ' + open + '건</div></div>' +
+    '<div class="rec-card"><div class="k">적중률</div><div class="v">' + pct(hit / rows.length) +
+      '</div><div class="d">95% CI ' + pct(ci[0]) + '~' + pct(ci[1]) + '</div></div>' +
+    '<div class="rec-card"><div class="k">무조건 홈승이었다면</div><div class="v">' + pct(base) +
+      '</div><div class="d">같은 경기 기준</div></div>' +
+    '<div class="rec-card"><div class="k">평균 예측확률</div><div class="v">' + pct(meanP) +
+      '</div><div class="d">보정: 실제와 ' +
+      ((hit / rows.length - meanP) * 100).toFixed(1) + '%p 차</div></div>' +
+    (clvRows.length ? '<div class="rec-card"><div class="k">배당 흐름 유리</div><div class="v">' +
+      pct(clvWin / clvRows.length) + '</div><div class="d">' + clvRows.length +
+      '건 중 (움직인 경기만)</div></div>' : '') +
+    '</div>';
+
+  var by = {};
+  rows.forEach(function (r) {
+    var b = by[r.lg] || (by[r.lg] = { n: 0, h: 0 });
+    b.n++; b.h += r.hit;
+  });
+  html += '<div class="sum-scroll"><table><thead><tr><th>리그</th><th>경기</th><th>적중</th>' +
+    '<th>적중률</th></tr></thead><tbody>';
+  Object.keys(by).sort().forEach(function (k) {
+    html += '<tr><td>' + k + '</td><td>' + by[k].n + '</td><td>' + by[k].h + '</td><td>' +
+      pct(by[k].h / by[k].n) + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+
+  html += '<details class="rec-log"><summary>정산된 경기 전부 보기</summary><div class="sum-scroll">' +
+    '<table><thead><tr><th>날짜</th><th>리그</th><th>경기</th><th>픽</th><th>확률</th>' +
+    '<th>스코어</th><th>결과</th></tr></thead><tbody>';
+  rows.slice().reverse().forEach(function (r) {
+    var name = r.pick === "H" ? sko(r.home) : (r.pick === "A" ? sko(r.away) : "무승부");
+    html += '<tr><td>' + r.date + '</td><td class="lgtag">' + r.lg + '</td><td>' + sko(r.away) +
+      ' @ ' + sko(r.home) + '</td><td>' + name + (r.fallback ? ' <span class="startedTag">승격추정</span>' : '') +
+      '</td><td>' + pct(r.pPick) + '</td><td>' + r.score + '</td><td class="' +
+      (r.hit ? "hit" : "miss") + '">' + (r.hit ? "적중" : "빗나감") + '</td></tr>';
+  });
+  html += '</tbody></table></div></details>';
+  html += '<p class="rec-lab" style="margin-top:8px;text-transform:none;letter-spacing:0;' +
+    'font-size:.78rem;">경기 시작 전 스냅샷에 들어 있던 픽만 셉니다. 결과는 다음 갱신 때 ESPN에서 ' +
+    '자동으로 채워집니다. 수백 경기가 쌓이기 전 숫자는 소음입니다 — 한 주 성적으로 판단하지 마세요.</p>';
+  el.innerHTML = html;
+})();
+</script>
+
+
+<script>
+/* 오늘의 픽 결과 -- 예약 갱신이 각 리그 공식 기록에서 결과를 받아 trackRecord 에 넣습니다.
+   형님이 손으로 넣으실 건 없습니다. MLB는 KST 15:30, KBO·NPB는 23:30에 그날 것을 마감합니다. */
+(async function () {
+  "use strict";
+  var el = document.getElementById("todayResult");
+  if (!el) return;
+  var GAMES = [], TRACK = [];
+  try { GAMES = JSON.parse(document.getElementById("gamesData").textContent) || []; } catch (e) {}
+  try { TRACK = (await (window.__TRACK__ || Promise.resolve([]))) || []; } catch (e) { TRACK = []; }
+
+  function kstDate(offsetDays) {
+    var d = new Date(Date.now() + (offsetDays || 0) * 86400000);
+    var k = new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000);
+    return k.getFullYear() + "-" + String(k.getMonth() + 1).padStart(2, "0") +
+           "-" + String(k.getDate()).padStart(2, "0");
+  }
+  var today = kstDate(0);
+  function pct(x) { return (x * 100).toFixed(1) + "%"; }
+
+  function shiftDate(d, days) {
+    var p = d.split("-");
+    var x = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    x.setUTCDate(x.getUTCDate() + days);
+    return x.toISOString().slice(0, 10);
+  }
+
+  // 야구는 같은 카드가 며칠 이어지는 시리즈라 팀 이름만으로 찾으면 어제 경기가 붙습니다.
+  // 반드시 날짜까지 맞춰야 합니다. MLB 정산 기록은 미국 날짜로 저장되므로 하루 당깁니다
+  // (KST 09-10 새벽~오전 경기 = 미국 09-09).
+  function trackDate(g) { return g.lg === "MLB" ? shiftDate(g.date, -1) : g.date; }
+
+  // 정산 기록은 예전(팀 코드) 것과 지금(한글 팀명) 것이 섞여 있습니다. 둘 다로 찾습니다.
+  function findResult(g) {
+    if (!g.date) return null;
+    var want = trackDate(g);
+    for (var i = 0; i < TRACK.length; i++) {
+      var t = TRACK[i];
+      if (t.lg !== g.lg || t.date !== want) continue;
+      if ((t.home === g.homeFull && t.away === g.awayFull) ||
+          (t.home === g.hKey && t.away === g.aKey)) return t;
+    }
+    return null;
+  }
+
+  var LGN = { MLB: "MLB", KBO: "KBO", NPB: "NPB" };
+  var rows = GAMES.map(function (g) {
+    var homePick = g.pHome >= 0.5;
+    return {
+      g: g,
+      time: g.status || "",
+      pick: homePick ? g.homeFull : g.awayFull,
+      p: homePick ? g.pHome : 1 - g.pHome,
+      t: findResult(g)
+    };
+  });
+
+  var done = rows.filter(function (r) { return r.t && typeof r.t.hit === "number"; });
+  var hits = done.reduce(function (a, r) { return a + r.t.hit; }, 0);
+  var ous = done.filter(function (r) { return typeof r.t.ouHit === "number"; });
+
+  var html = '<h2>오늘의 픽 결과</h2>' +
+    '<p class="hint">오늘 낸 픽이 맞았는지 여기서 바로 보입니다. 결과는 자동으로 채워집니다 — ' +
+    '<b>MLB는 KST 15:30, KBO·NPB는 23:30</b>에 그날 경기를 마감합니다. ' +
+    '형님이 직접 넣으실 건 없습니다.</p>';
+
+  if (!rows.length) {
+    el.innerHTML = html + '<div class="tr-card"><div class="d">오늘 잡힌 경기가 없습니다.</div></div>';
+    return;
+  }
+
+  html += '<div class="tr-cards">' +
+    '<div class="tr-card"><div class="k">오늘 경기</div><div class="v">' + rows.length +
+      '</div><div class="d">' + [["MLB",0],["KBO",0],["NPB",0]].map(function (x) {
+        var n = rows.filter(function (r) { return r.g.lg === x[0]; }).length;
+        return n ? x[0] + " " + n : null;
+      }).filter(Boolean).join(" · ") + '</div></div>' +
+    '<div class="tr-card"><div class="k">결과 나온 경기</div><div class="v">' + done.length +
+      '</div><div class="d">' + (rows.length - done.length) + '경기 대기</div></div>' +
+    '<div class="tr-card"><div class="k">적중</div><div class="v">' +
+      (done.length ? hits + "/" + done.length : "—") + '</div><div class="d">' +
+      (done.length ? pct(hits / done.length) : "아직 없음") + '</div></div>' +
+    (ous.length ? '<div class="tr-card"><div class="k">NPB 언더오버</div><div class="v">' +
+      ous.reduce(function (a, r) { return a + r.t.ouHit; }, 0) + "/" + ous.length +
+      '</div><div class="d">7.5 기준</div></div>' : '') +
+    '</div>';
+
+  html += '<div class="sum-scroll"><table><thead><tr><th>시각</th><th>리그</th><th>경기</th>' +
+    '<th>모델 픽</th><th>확률</th><th>결과</th><th>스코어</th></tr></thead><tbody>';
+  rows.forEach(function (r) {
+    var t = r.t, res, score = "—";
+    if (t && typeof t.hit === "number") {
+      res = '<span class="tr-res ' + (t.hit ? "hit" : "miss") + '">' +
+            (t.hit ? "적중" : "빗나감") + '</span>';
+      if (typeof t.ouHit === "number") {
+        res += '<span class="tr-ou">' + t.ouPick + " " + (t.ouHit ? "○" : "×") + '</span>';
+      }
+      score = t.score || "—";
+    } else if (r.g.cancelled) {
+      res = '<span class="tr-res wait">' + r.g.cancelled + '</span>';
+    } else {
+      res = '<span class="tr-res wait">대기</span>';
+    }
+    html += '<tr><td class="tr-lg">' + (r.time || "—") + '</td><td class="tr-lg">' +
+      (LGN[r.g.lg] || r.g.lg) + '</td><td>' + r.g.awayFull + ' @ ' + r.g.homeFull +
+      '</td><td class="pk">' + r.pick + '</td><td>' + pct(r.p) + '</td><td>' + res +
+      '</td><td class="tr-lg">' + score + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  html += '<p class="hint" style="margin:10px 0 0">스코어는 <b>원정-홈</b> 순서입니다. ' +
+    '하루치 성적은 표본이 너무 작아 실력이 아니라 운입니다 — 누적은 아래 성적표를 보세요.</p>';
+  el.innerHTML = html;
+})();
+</script>
+
+<script>
+/* 갱신이 멈추면 형님이 바로 아시게. 날짜배지가 오늘(KST)이 아니면 빨간 띠를 띄웁니다.
+   2026-09-12 추가 -- 예약 런이 "성공"이라고 찍히면서 실제로는 아티팩트를 못 고친 적이
+   이틀 있었고, 그걸 페이지만 보고는 알 수 없었습니다. */
+(function () {
+  "use strict";
+  var chip = document.getElementById("dateChip");
+  if (!chip) return;
+  var m = (chip.textContent || "").match(/(\d{4}-\d{2}-\d{2})/);
+  if (!m) return;
+  var d = new Date(Date.now());
+  var k = new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000);
+  var today = k.getFullYear() + "-" + String(k.getMonth() + 1).padStart(2, "0") +
+              "-" + String(k.getDate()).padStart(2, "0");
+  if (m[1] === today) return;
+  var days = Math.round((Date.parse(today) - Date.parse(m[1])) / 86400000);
+  // 자정이 막 지난 시각에는 00:00 MLB 런이 아직 안 끝났을 수 있습니다.
+  // 하루 차이 + 01:00 이전이면 정상 진행 중이니 빨간 띠를 띄우지 않습니다.
+  if (days === 1 && k.getHours() < 1) return;
+  var bar = document.createElement("div");
+  bar.style.cssText = "background:var(--bad-dim);border:1px solid var(--bad);color:var(--ink);" +
+    "border-radius:12px;padding:13px 16px;margin-bottom:18px;font-size:.9rem";
+  bar.innerHTML = '<b style="color:var(--bad)">갱신이 멈췄습니다.</b> 이 화면은 <b>' + m[1] +
+    '</b> 자료입니다 (' + (days > 0 ? days + '일 지남' : '날짜 불일치') +
+    '). 아래 경기·픽·결과는 오늘 것이 아닙니다 — 저한테 "갱신 멈췄다"고 알려주시면 바로 확인하겠습니다.' +
+    (function () {
+      var r = document.getElementById("runChip");
+      var t = r && (r.textContent || "").replace("마지막 작업", "").trim();
+      return (t && t !== "—") ? ' <span style="color:var(--ink-soft)">(마지막으로 돌아간 작업: ' + t + ')</span>' : '';
+    })();
+  var wrap = document.querySelector(".wrap");
+  var tabs = document.getElementById("sportTabs");
+  if (wrap && tabs) wrap.insertBefore(bar, tabs.nextSibling);
+})();
+</script>
+</body></html>
